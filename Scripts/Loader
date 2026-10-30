@@ -12,6 +12,7 @@ local PlaceScripts = {
     [98927955463992]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Games/sza",
     [537413528]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Babft",
     [126229277218112]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Games/Ab"
+    [140471564894352]  = "https://raw.githubusercontent.com/Absolbite/Main/refs/heads/main/Scripts/Games/LTM"
 }
 
 local placeId = game.PlaceId
