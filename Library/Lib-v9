@@ -2710,6 +2710,10 @@ function veltrolib:SetTheme(NewTheme)
 		elseif Val.Type == "ScrollBar" then
 			local prop = GetColor(inst)
 			if prop ~= "" then inst[prop] = Theme["Color Theme"] end
+		elseif Val.Type == "DropdownOpt" then
+			local on = inst:GetAttribute("Selected") == true
+			inst.BackgroundColor3 = on and Theme["Color Theme"] or Theme["Color Hub 2"]
+			inst.BackgroundTransparency = on and 0.65 or (Theme["Panel Transparency"] or math.clamp(CurrentTransparency + 0.55, 0, 0.95))
 		end
 	end)
 end
@@ -4852,6 +4856,7 @@ function veltrolib:MakeWindow(Configs)
 						for _,v in pairs(Options) do
 							local nodes = v.nodes
 							local on = Selected[v.Name] == true
+							nodes[1]:SetAttribute("Selected", on)
 							CreateTween({nodes[1], "BackgroundColor3", on and Theme["Color Theme"] or Theme["Color Hub 2"], 0.35})
 							CreateTween({nodes[1], "BackgroundTransparency", on and 0.65 or OptDefaultTrans, 0.35})
 							CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
@@ -4860,6 +4865,7 @@ function veltrolib:MakeWindow(Configs)
 						for _,v in pairs(Options) do
 							local on = v.Value == Selected
 							local nodes = v.nodes
+							nodes[1]:SetAttribute("Selected", on)
 							CreateTween({nodes[1], "BackgroundColor3", on and Theme["Color Theme"] or Theme["Color Hub 2"], 0.35})
 							CreateTween({nodes[1], "BackgroundTransparency", on and 0.65 or OptDefaultTrans, 0.35})
 							CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
@@ -4910,6 +4916,8 @@ function veltrolib:MakeWindow(Configs)
 						Size = UDim2.new(1, 0, 0, 21),
 					})
 					Make("Corner", Btn, UDim.new(0, 4))
+					Btn:SetAttribute("Selected", false)
+					InsertTheme(Btn, "DropdownOpt")
 
 					local OptLabel = InsertTheme(Create("TextLabel", Btn, {
 						Size = UDim2.new(1, -16, 1, 0),
@@ -5084,6 +5092,7 @@ function veltrolib:MakeWindow(Configs)
 				for _, v in pairs(Options2) do
 					local on = DMultiSelect and (Selected[v.Name] == true) or (v.Value == Selected)
 					local nodes = v.nodes
+					nodes[1]:SetAttribute("Selected", on)
 					CreateTween({nodes[1], "BackgroundColor3", on and Theme["Color Theme"] or Theme["Color Hub 2"], 0.35})
 					CreateTween({nodes[1], "BackgroundTransparency", on and 0.65 or DefaultTrans, 0.35})
 					CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
@@ -5152,13 +5161,13 @@ function veltrolib:MakeWindow(Configs)
 			}), "Theme")
 			Make("Corner", Indicator, UDim.new(0.5, 0))
 
-			local SliderIcon = Create("Frame", SliderBar, {
+			local SliderIcon = InsertTheme(Create("Frame", SliderBar, {
 				Size = UDim2.new(0, 12, 0, 12),
-				BackgroundColor3 = Color3.fromRGB(220, 220, 220),
+				BackgroundColor3 = Theme["Color Theme"],
 				Position = UDim2.fromScale(0, 0.5),
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundTransparency = 0.2
-			})
+			}), "Theme")
 			Make("Corner", SliderIcon, UDim.new(0.5, 0))
 
 			local InputHolder = InsertTheme(Create("Frame", Button, {
@@ -5251,27 +5260,13 @@ function veltrolib:MakeWindow(Configs)
 				SetSlider(newVal)
 			end
 
-			local KnobIdleColor = Color3.fromRGB(220, 220, 220)
-
 			SliderHolder.MouseButton1Down:Connect(function()
 				Container.ScrollingEnabled = false
-				CreateTween({SliderIcon, "BackgroundColor3", Theme["Color Theme"], 0.12})
 				while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
 					task.wait()
 					ControlPos()
 				end
-				CreateTween({SliderIcon, "BackgroundColor3", KnobIdleColor, 0.2})
 				Container.ScrollingEnabled = true
-			end)
-
-			SliderHolder.MouseEnter:Connect(function()
-				CreateTween({SliderIcon, "BackgroundColor3", Theme["Color Theme"], 0.12})
-			end)
-
-			SliderHolder.MouseLeave:Connect(function()
-				if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-					CreateTween({SliderIcon, "BackgroundColor3", KnobIdleColor, 0.15})
-				end
 			end)
 
 			ValueInput:GetPropertyChangedSignal("Text"):Connect(function()
