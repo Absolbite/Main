@@ -4639,6 +4639,8 @@ function veltrolib:MakeWindow(Configs)
 			local DMultiSelect = Configs.MultiSelect or false
 			local Callback = Funcs:GetCallback(Configs, 4)
 
+			local ZBase = 1000
+
 			local Button, LabelFunc = ButtonFrame(Container, DName, DDesc, UDim2.new(1, -180))
 
 			local SelectedFrame = InsertTheme(Create("Frame", Button, {
@@ -4683,29 +4685,31 @@ function veltrolib:MakeWindow(Configs)
 				Size = UDim2.new(1, 0, 1, 0),
 				BackgroundTransparency = 1,
 				Visible = false,
-				Text = ""
+				Text = "",
+				AutoButtonColor = false,
+				ZIndex = ZBase
 			})
 
 			local DropFrame = Create("Frame", NoClickFrame, {
 				Size = UDim2.new(0, 152, 0, 0),
-				BackgroundTransparency = 0.1,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 0,
+				BackgroundColor3 = Theme["Color Hub 2"],
 				AnchorPoint = Vector2.new(0, 1),
 				Name = "DropdownFrame",
 				ClipsDescendants = true,
 				Active = true,
-				ZIndex = 100
+				ZIndex = ZBase + 1
 			})
 			Make("Corner", DropFrame)
 			Make("Stroke", DropFrame)
-			Make("Gradient", DropFrame, {Rotation = 60})
 
 			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
 				Size = UDim2.new(1, -10, 0, 22),
 				Position = UDim2.new(0, 5, 0, 4),
 				BackgroundColor3 = Theme["Color Theme"],
 				BackgroundTransparency = 0.85,
-				Name = "SearchHolder"
+				Name = "SearchHolder",
+				ZIndex = ZBase + 2
 			}), "Theme")
 			Make("Corner", SearchHolder, UDim.new(0, 4))
 
@@ -4715,7 +4719,8 @@ function veltrolib:MakeWindow(Configs)
 				AnchorPoint = Vector2.new(0, 0.5),
 				BackgroundTransparency = 1,
 				Image = "rbxassetid://10734943674",
-				ImageColor3 = Theme["Color Dark Text"]
+				ImageColor3 = Theme["Color Dark Text"],
+				ZIndex = ZBase + 3
 			}), "DarkText")
 
 			local SearchBox = InsertTheme(Create("TextBox", SearchHolder, {
@@ -4729,7 +4734,8 @@ function veltrolib:MakeWindow(Configs)
 				PlaceholderColor3 = Theme["Color Dark Text"],
 				Text = "",
 				ClearTextOnFocus = false,
-				TextXAlignment = "Left"
+				TextXAlignment = "Left",
+				ZIndex = ZBase + 3
 			}), "Text")
 
 			local ScrollFrame = InsertTheme(Create("ScrollingFrame", DropFrame, {
@@ -4742,7 +4748,8 @@ function veltrolib:MakeWindow(Configs)
 				CanvasSize = UDim2.new(),
 				ScrollingDirection = "Y",
 				AutomaticCanvasSize = "Y",
-				Active = true
+				Active = true,
+				ZIndex = ZBase + 2
 			}, {
 				Create("UIPadding", {
 					PaddingLeft = UDim.new(0, 8),
@@ -4929,6 +4936,7 @@ function veltrolib:MakeWindow(Configs)
 						Name = "Option",
 						Size = UDim2.new(1, 0, 0, 21),
 					})
+					Btn.ZIndex = ZBase + 3
 					Make("Corner", Btn, UDim.new(0, 4))
 					Btn:SetAttribute("Selected", false)
 					InsertTheme(Btn, "DropdownOpt")
@@ -4939,7 +4947,8 @@ function veltrolib:MakeWindow(Configs)
 						AnchorPoint = Vector2.new(0, 0.5),
 						BackgroundColor3 = Theme["Color Theme"],
 						BackgroundTransparency = 0.8,
-						Visible = MultiSelect
+						Visible = MultiSelect,
+						ZIndex = ZBase + 4
 					}), "Theme")
 					Make("Corner", SelectBall, UDim.new(0.5, 0))
 
@@ -4951,7 +4960,8 @@ function veltrolib:MakeWindow(Configs)
 						Font = Enum.Font.GothamBold,
 						TextXAlignment = "Left",
 						BackgroundTransparency = 1,
-						TextTransparency = 0.4
+						TextTransparency = 0.4,
+						ZIndex = ZBase + 4
 					}), "Text")
 
 					Btn.Activated:Connect(function()
