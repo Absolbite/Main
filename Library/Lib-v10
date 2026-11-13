@@ -4392,7 +4392,7 @@ function veltrolib:MakeWindow(Configs)
 
 			local FButton, LabelFunc = ButtonFrame(Container, BName, BDescription, UDim2.new(1, -20))
 
-			local ButtonIcon = Create("ImageLabel", FButton, {
+			Create("ImageLabel", FButton, {
 				Size = UDim2.new(0, 14, 0, 14),
 				Position = UDim2.new(1, -10, 0.5),
 				AnchorPoint = Vector2.new(1, 0.5),
@@ -4405,15 +4405,18 @@ function veltrolib:MakeWindow(Configs)
 				Size = UDim2.fromScale(1, 1),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				BackgroundTransparency = 1,
+				Active = false,
 				ZIndex = 2
 			})
 			Make("Corner", ClickFlash, UDim.new(0, 3))
 
+			FButton.MouseButton1Down:Connect(function()
+				ClickFlash.BackgroundTransparency = 0.55
+			end)
+
 			FButton.Activated:Connect(function()
-				CreateTween({ClickFlash, "BackgroundTransparency", 0.55, 0.08})
-				task.delay(0.08, function()
-					CreateTween({ClickFlash, "BackgroundTransparency", 1, 0.25})
-				end)
+				ClickFlash.BackgroundTransparency = 0.55
+				CreateTween({ClickFlash, "BackgroundTransparency", 1, 0.2})
 				if BFlag then
 					IsPressed = not IsPressed
 					SetFlag(BFlag, IsPressed)
@@ -4857,16 +4860,17 @@ function veltrolib:MakeWindow(Configs)
 				local Color = On and Theme["Color Theme"] or Theme["Color Hub 2"]
 				local Trans = On and 0.85 or OptDefaultTrans
 				local TextTrans = On and 0 or 0.4
-				if Instant then
-					Btn.BackgroundColor3 = Color
+				local BallTrans = On and 0 or 0.8
+				Btn.BackgroundColor3 = Color
+				if Instant or not On then
 					Btn.BackgroundTransparency = Trans
 					Label.TextTransparency = TextTrans
-					if Ball then Ball.BackgroundTransparency = On and 0 or 0.8 end
+					if Ball then Ball.BackgroundTransparency = BallTrans end
 				else
-					CreateTween({Btn, "BackgroundColor3", Color, 0.35})
-					CreateTween({Btn, "BackgroundTransparency", Trans, 0.35})
-					CreateTween({Label, "TextTransparency", TextTrans, 0.35})
-					if Ball then CreateTween({Ball, "BackgroundTransparency", On and 0 or 0.8, 0.35}) end
+					Btn.BackgroundTransparency = OptDefaultTrans
+					CreateTween({Btn, "BackgroundTransparency", Trans, 0.12})
+					CreateTween({Label, "TextTransparency", TextTrans, 0.12})
+					if Ball then CreateTween({Ball, "BackgroundTransparency", BallTrans, 0.12}) end
 				end
 			end
 
