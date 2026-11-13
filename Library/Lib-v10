@@ -4917,7 +4917,7 @@ function veltrolib:MakeWindow(Configs)
 				local Ball
 				if MultiSelect then
 					Ball = InsertTheme(Create("Frame", Btn, {
-						Position = UDim2.new(0, 10, 0.5),
+						Position = UDim2.new(0, 8, 0.5),
 						Size = UDim2.new(0, 4, 0, 4),
 						AnchorPoint = Vector2.new(0, 0.5),
 						BackgroundColor3 = Theme["Color Theme"],
@@ -4928,8 +4928,8 @@ function veltrolib:MakeWindow(Configs)
 				end
 
 				local OptLabel = InsertTheme(Create("TextLabel", Btn, {
-					Size = UDim2.new(1, MultiSelect and -30 or -16, 1, 0),
-					Position = UDim2.new(0, MultiSelect and 22 or 8),
+					Size = UDim2.new(1, MultiSelect and -27 or -16, 1, 0),
+					Position = UDim2.new(0, MultiSelect and 19 or 8),
 					Text = Name,
 					TextColor3 = Theme["Color Text"],
 					Font = Enum.Font.GothamBold,
