@@ -4637,10 +4637,14 @@ function veltrolib:MakeWindow(Configs)
 			local DOptions = Configs[2] or Configs.Options or {}
 			local OpDefault = Configs[3] or Configs.Default or {}
 			local Flag = Configs[5] or Configs.Flag or false
-			local DMultiSelect = Configs.MultiSelect or false
+			local MultiSelect = Configs.MultiSelect or false
 			local Callback = Funcs:GetCallback(Configs, 4)
 
-			local Button, LabelFunc = ButtonFrame(Container, DName, DDesc, UDim2.new(1, -180))
+			local Z = 100
+			local DropWidth = 152
+			local OptDefaultTrans = Theme["Panel Transparency"] or math.clamp(CurrentTransparency + 0.55, 0, 0.95)
+
+			local Button = ButtonFrame(Container, DName, DDesc, UDim2.new(1, -180))
 
 			local SelectedFrame = InsertTheme(Create("Frame", Button, {
 				Size = UDim2.new(0, 150, 0, 18),
@@ -4660,15 +4664,8 @@ function veltrolib:MakeWindow(Configs)
 				TextSize = 10,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextColor3 = Theme["Color Text"],
-				Text = "..."
-			}, {
-				Create("UIGradient", {
-					Transparency = NumberSequence.new({
-						NumberSequenceKeypoint.new(0.00, 0),
-						NumberSequenceKeypoint.new(0.6, 0),
-						NumberSequenceKeypoint.new(1.00, 1)
-					})
-				})
+				Text = "...",
+				ClipsDescendants = true
 			}), "Text")
 
 			local Arrow = Create("ImageLabel", SelectedFrame, {
@@ -4685,18 +4682,18 @@ function veltrolib:MakeWindow(Configs)
 				BackgroundTransparency = 1,
 				Visible = false,
 				Text = "",
-				ZIndex = 100
+				ZIndex = Z
 			})
 
 			local DropFrame = Create("Frame", NoClickFrame, {
-				Size = UDim2.new(0, 152, 0, 0),
+				Size = UDim2.new(0, DropWidth, 0, 0),
 				BackgroundTransparency = 0.1,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				AnchorPoint = Vector2.new(0, 1),
 				Name = "DropdownFrame",
 				ClipsDescendants = true,
 				Active = true,
-				ZIndex = 100
+				ZIndex = Z
 			})
 			Make("Corner", DropFrame)
 			Make("Stroke", DropFrame)
@@ -4708,18 +4705,18 @@ function veltrolib:MakeWindow(Configs)
 				BackgroundColor3 = Theme["Color Theme"],
 				BackgroundTransparency = 0.85,
 				Name = "SearchHolder",
-				ZIndex = 100
+				ZIndex = Z
 			}), "Theme")
 			Make("Corner", SearchHolder, UDim.new(0, 4))
 
-			local SearchIcon = InsertTheme(Create("ImageLabel", SearchHolder, {
+			InsertTheme(Create("ImageLabel", SearchHolder, {
 				Size = UDim2.new(0, 12, 0, 12),
 				Position = UDim2.new(0, 5, 0.5),
 				AnchorPoint = Vector2.new(0, 0.5),
 				BackgroundTransparency = 1,
 				Image = "rbxassetid://10734943674",
 				ImageColor3 = Theme["Color Dark Text"],
-				ZIndex = 100
+				ZIndex = Z
 			}), "DarkText")
 
 			local SearchBox = InsertTheme(Create("TextBox", SearchHolder, {
@@ -4734,7 +4731,7 @@ function veltrolib:MakeWindow(Configs)
 				Text = "",
 				ClearTextOnFocus = false,
 				TextXAlignment = "Left",
-				ZIndex = 100
+				ZIndex = Z
 			}), "Text")
 
 			local ScrollFrame = InsertTheme(Create("ScrollingFrame", DropFrame, {
@@ -4748,7 +4745,7 @@ function veltrolib:MakeWindow(Configs)
 				ScrollingDirection = "Y",
 				AutomaticCanvasSize = "Y",
 				Active = true,
-				ZIndex = 100
+				ZIndex = Z
 			}, {
 				Create("UIPadding", {
 					PaddingLeft = UDim.new(0, 8),
@@ -4759,391 +4756,326 @@ function veltrolib:MakeWindow(Configs)
 				Create("UIListLayout", { Padding = UDim.new(0, 4) })
 			}), "ScrollBar")
 
-			local ScrollSize, WaitDrop = 5
+			local Options, Order = {}, {}
+			local Selected
+			local CurrentOpt
+			local SelectedValues = {}
+			local InitialSet = {}
+			local VisibleCount, Query = 0, ""
+			local ScrollSize, WaitDrop = 5, false
 
-			local function Disable()
-				WaitDrop = true
-				CreateTween({Arrow, "Rotation", 0, 0.2})
-				CreateTween({DropFrame, "Size", UDim2.new(0, 152, 0, 0), 0.2, true})
-				CreateTween({Arrow, "ImageColor3", Color3.fromRGB(255, 255, 255), 0.2})
-				Arrow.Image = "rbxassetid://10709790948"
-				NoClickFrame.Visible = false
-				SearchBox.Text = ""
-				WaitDrop = false
+			local savedFlag = CheckFlag(Flag) and GetFlag(Flag) or nil
+			local Default = type(OpDefault) ~= "table" and {OpDefault} or OpDefault
+			if MultiSelect then
+				local source = savedFlag or Default
+				if type(source) == "table" then
+					for _, v in ipairs(source) do
+						if type(v) == "string" then InitialSet[v] = true end
+					end
+				end
+			else
+				Selected = type(savedFlag) == "string" and savedFlag or Default[1]
 			end
 
 			local function GetFrameSize()
-				return UDim2.fromOffset(152, ScrollSize + 30)
+				return UDim2.fromOffset(DropWidth, ScrollSize + 30)
 			end
 
-			local function CalculateSize()
-				local Count = 0
-				for _,Frame in pairs(ScrollFrame:GetChildren()) do
-					if Frame:IsA("TextButton") or (Frame:IsA("Frame") and Frame.Name == "Option") then
-						if Frame.Visible then Count = Count + 1 end
-					end
-				end
-				ScrollSize = (math.clamp(Count, 0, 10) * 25) + 10
+			local function Resize()
+				ScrollSize = math.min(VisibleCount, 10) * 25 + 10
 				if NoClickFrame.Visible then
 					CreateTween({DropFrame, "Size", GetFrameSize(), 0.2})
 				end
 			end
 
+			local function CalculatePos(Instant)
+				local FramePos = SelectedFrame.AbsolutePosition
+				local ScreenSize = ScreenGui.AbsoluteSize
+				local ClampX = math.clamp(FramePos.X / UIScale, 0, ScreenSize.X / UIScale - DropWidth)
+				local ClampY = math.clamp(FramePos.Y / UIScale, 0, ScreenSize.Y / UIScale)
+				local NewPos = UDim2.fromOffset(ClampX, ClampY)
+				DropFrame.AnchorPoint = Vector2.new(0, FramePos.Y > ScreenSize.Y / 1.4 and 1 or ScrollSize > 80 and 0.5 or 0)
+				if Instant then
+					DropFrame.Position = NewPos
+				else
+					CreateTween({DropFrame, "Position", NewPos, 0.1})
+				end
+			end
+
+			local function Disable()
+				if not NoClickFrame.Visible then return end
+				WaitDrop = true
+				CreateTween({Arrow, "ImageColor3", Color3.fromRGB(255, 255, 255), 0.2})
+				CreateTween({DropFrame, "Size", UDim2.new(0, DropWidth, 0, 0), 0.2, true})
+				Arrow.Image = "rbxassetid://10709790948"
+				NoClickFrame.Visible = false
+				if SearchBox.Text ~= "" then SearchBox.Text = "" end
+				WaitDrop = false
+			end
+
 			local function Minimize()
 				if WaitDrop then return end
-				WaitDrop = true
 				if NoClickFrame.Visible then
-					Arrow.Image = "rbxassetid://10709790948"
-					CreateTween({Arrow, "ImageColor3", Color3.fromRGB(255, 255, 255), 0.2})
-					CreateTween({DropFrame, "Size", UDim2.new(0, 152, 0, 0), 0.2, true})
-					NoClickFrame.Visible = false
-					SearchBox.Text = ""
+					Disable()
 				else
+					WaitDrop = true
+					CalculatePos(true)
 					NoClickFrame.Visible = true
 					Arrow.Image = "rbxassetid://10709791523"
 					CreateTween({Arrow, "ImageColor3", Theme["Color Theme"], 0.2})
 					CreateTween({DropFrame, "Size", GetFrameSize(), 0.2, true})
+					WaitDrop = false
 				end
-				WaitDrop = false
 			end
 
-			local function CalculatePos()
-				local FramePos = SelectedFrame.AbsolutePosition
-				local ScreenSize = ScreenGui.AbsoluteSize
-				local ClampX = math.clamp((FramePos.X / UIScale), 0, ScreenSize.X / UIScale - DropFrame.Size.X.Offset)
-				local ClampY = math.clamp((FramePos.Y / UIScale), 0, ScreenSize.Y / UIScale)
-				local NewPos = UDim2.fromOffset(ClampX, ClampY)
-				local AnchorPoint = FramePos.Y > ScreenSize.Y / 1.4 and 1 or ScrollSize > 80 and 0.5 or 0
-				DropFrame.AnchorPoint = Vector2.new(0, AnchorPoint)
-				CreateTween({DropFrame, "Position", NewPos, 0.1})
-			end
-
-			local AddNewOptions, GetOptions, AddOption, RemoveOption, Selected do
-				local savedFlag = CheckFlag(Flag) and GetFlag(Flag) or nil
-				local Default = type(OpDefault) ~= "table" and {OpDefault} or OpDefault
-				local MultiSelect = DMultiSelect
-				local Options = {}
-
+			local function UpdateLabel()
+				local Text
 				if MultiSelect then
-					Selected = {}
-					local source = savedFlag or Default
-					if type(source) == "table" then
-						for _, v in ipairs(source) do
-							if type(v) == "string" then
-								Selected[v] = true
-							end
-						end
-					end
+					Text = #SelectedValues > 0 and table.concat(SelectedValues, ", ") or "..."
 				else
-					if type(savedFlag) == "string" then
-						Selected = savedFlag
-					else
-						Selected = Default[1] or nil
-					end
+					Text = Selected ~= nil and tostring(Selected) or "..."
+					if Text == "" then Text = "..." end
 				end
+				ActiveLabel.Text = Text
+			end
 
-				local SelectedValues = {}
+			local function Fire()
 				if MultiSelect then
-					for k, v in pairs(Selected) do
-						if v then table.insert(SelectedValues, k) end
-					end
+					SetFlag(Flag, SelectedValues)
+					Funcs:FireCallback(Callback, SelectedValues)
+				else
+					SetFlag(Flag, tostring(Selected or ""))
+					Funcs:FireCallback(Callback, Selected)
 				end
+			end
 
-				local function CallbackSelected()
-					if MultiSelect then
-						SetFlag(Flag, SelectedValues)
-						Funcs:FireCallback(Callback, SelectedValues)
+			local function SetState(Opt, On, Instant)
+				if Opt.on == On then return end
+				Opt.on = On
+				local Btn, Label, Ball = Opt.nodes[1], Opt.nodes[2], Opt.nodes[3]
+				Btn:SetAttribute("Selected", On)
+				local Color = On and Theme["Color Theme"] or Theme["Color Hub 2"]
+				local Trans = On and 0.85 or OptDefaultTrans
+				local TextTrans = On and 0 or 0.4
+				if Instant then
+					Btn.BackgroundColor3 = Color
+					Btn.BackgroundTransparency = Trans
+					Label.TextTransparency = TextTrans
+					if Ball then Ball.BackgroundTransparency = On and 0 or 0.8 end
+				else
+					CreateTween({Btn, "BackgroundColor3", Color, 0.35})
+					CreateTween({Btn, "BackgroundTransparency", Trans, 0.35})
+					CreateTween({Label, "TextTransparency", TextTrans, 0.35})
+					if Ball then CreateTween({Ball, "BackgroundTransparency", On and 0 or 0.8, 0.35}) end
+				end
+			end
+
+			local function RemoveFromValues(Name)
+				local idx = table.find(SelectedValues, Name)
+				if idx then table.remove(SelectedValues, idx) end
+			end
+
+			local function SelectOpt(Opt)
+				if MultiSelect then
+					local On = not Opt.on
+					if On then
+						table.insert(SelectedValues, Opt.Name)
 					else
-						SetFlag(Flag, tostring(Selected or ""))
-						Funcs:FireCallback(Callback, Selected)
+						RemoveFromValues(Opt.Name)
 					end
+					SetState(Opt, On)
+				else
+					if CurrentOpt and CurrentOpt ~= Opt then SetState(CurrentOpt, false) end
+					CurrentOpt = Opt
+					Selected = Opt.Value
+					SetState(Opt, true)
 				end
+				UpdateLabel()
+				Fire()
+			end
 
-				local function UpdateLabel()
-					if MultiSelect then
-						ActiveLabel.Text = #SelectedValues > 0 and table.concat(SelectedValues, ", ") or "..."
-					else
-						local text = tostring(Selected or "...")
-						ActiveLabel.Text = (text ~= "" and text) or "..."
-					end
-				end
+			local function AddOption(index, Value)
+				local Name = tostring(type(index) == "string" and index or Value)
+				if Options[Name] then return end
 
-				local OptDefaultTrans = Theme["Panel Transparency"] or math.clamp(CurrentTransparency + 0.55, 0, 0.95)
+				local Opt = {index = index, Value = Value, Name = Name, lower = Name:lower()}
+				Options[Name] = Opt
+				Order[#Order + 1] = Opt
 
-				local function UpdateSelected()
-					if MultiSelect then
-						for _,v in pairs(Options) do
-							local nodes = v.nodes
-							local on = Selected[v.Name] == true
-							nodes[1]:SetAttribute("Selected", false)
-							CreateTween({nodes[1], "BackgroundColor3", Theme["Color Hub 2"], 0.35})
-							CreateTween({nodes[1], "BackgroundTransparency", OptDefaultTrans, 0.35})
-							CreateTween({nodes[3], "BackgroundTransparency", on and 0 or 0.8, 0.35})
-							CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
-						end
-					else
-						for _,v in pairs(Options) do
-							local on = v.Value == Selected
-							local nodes = v.nodes
-							nodes[1]:SetAttribute("Selected", on)
-							CreateTween({nodes[1], "BackgroundColor3", on and Theme["Color Theme"] or Theme["Color Hub 2"], 0.35})
-							CreateTween({nodes[1], "BackgroundTransparency", on and 0.85 or OptDefaultTrans, 0.35})
-							CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
-						end
-					end
-					UpdateLabel()
-				end
+				local Btn = Make("Button", ScrollFrame, {
+					Name = "Option",
+					Size = UDim2.new(1, 0, 0, 21),
+					ZIndex = Z
+				})
+				Make("Corner", Btn, UDim.new(0, 4))
+				InsertTheme(Btn, "DropdownOpt")
 
-				local function SelectOpt(Opt)
-					if MultiSelect then
-						local on = not (Selected[Opt.Name] == true)
-						Selected[Opt.Name] = on
-						if on then
-							if not table.find(SelectedValues, Opt.Name) then
-								table.insert(SelectedValues, Opt.Name)
-							end
-						else
-							local idx = table.find(SelectedValues, Opt.Name)
-							if idx then table.remove(SelectedValues, idx) end
-						end
-					else
-						Selected = Opt.Value
-					end
-					CallbackSelected()
-					UpdateSelected()
-				end
-
-				AddOption = function(index, Value)
-					local Name = tostring(type(index) == "string" and index or Value)
-					if Options[Name] then return end
-
-					Options[Name] = {
-						index = index,
-						Value = Value,
-						Name = Name,
-					}
-
-					if MultiSelect then
-						if Selected[Name] == nil then Selected[Name] = false end
-						local on = Selected[Name]
-						if on and not table.find(SelectedValues, Name) then
-							table.insert(SelectedValues, Name)
-						end
-					end
-
-					local Btn = Make("Button", ScrollFrame, {
-						Name = "Option",
-						Size = UDim2.new(1, 0, 0, 21),
-						ZIndex = 100
-					})
-					Make("Corner", Btn, UDim.new(0, 4))
-					Btn:SetAttribute("Selected", false)
-					InsertTheme(Btn, "DropdownOpt")
-
-					local SelectBall = InsertTheme(Create("Frame", Btn, {
-						Position = UDim2.new(0, 8, 0.5),
-						Size = UDim2.new(0, 8, 0, 8),
+				local Ball
+				if MultiSelect then
+					Ball = InsertTheme(Create("Frame", Btn, {
+						Position = UDim2.new(0, 10, 0.5),
+						Size = UDim2.new(0, 4, 0, 4),
 						AnchorPoint = Vector2.new(0, 0.5),
 						BackgroundColor3 = Theme["Color Theme"],
 						BackgroundTransparency = 0.8,
-						Visible = MultiSelect,
-						ZIndex = 100
+						ZIndex = Z
 					}), "Theme")
-					Make("Corner", SelectBall, UDim.new(0.5, 0))
-
-					local OptLabel = InsertTheme(Create("TextLabel", Btn, {
-						Size = UDim2.new(1, MultiSelect and -32 or -16, 1, 0),
-						Position = UDim2.new(0, MultiSelect and 24 or 8),
-						Text = Name,
-						TextColor3 = Theme["Color Text"],
-						Font = Enum.Font.GothamBold,
-						TextXAlignment = "Left",
-						BackgroundTransparency = 1,
-						TextTransparency = 0.4,
-						ZIndex = 100
-					}), "Text")
-
-					Btn.Activated:Connect(function()
-						SelectOpt(Options[Name])
-					end)
-
-					Options[Name].nodes = {Btn, OptLabel, SelectBall}
+					Make("Corner", Ball, UDim.new(0.5, 0))
 				end
 
-				RemoveOption = function(index, Value)
-					local Name = tostring(type(index) == "string" and index or Value)
-					if Options[Name] then
-						if MultiSelect then
-							Selected[Name] = nil
-							local idx = table.find(SelectedValues, Name)
-							if idx then table.remove(SelectedValues, idx) end
-						else
-							if Selected == Name then Selected = nil end
-						end
-						Options[Name].nodes[1]:Destroy()
-						table.clear(Options[Name])
-						Options[Name] = nil
-					end
+				local OptLabel = InsertTheme(Create("TextLabel", Btn, {
+					Size = UDim2.new(1, MultiSelect and -30 or -16, 1, 0),
+					Position = UDim2.new(0, MultiSelect and 22 or 8),
+					Text = Name,
+					TextColor3 = Theme["Color Text"],
+					Font = Enum.Font.GothamBold,
+					TextXAlignment = "Left",
+					BackgroundTransparency = 1,
+					TextTransparency = 0.4,
+					ZIndex = Z
+				}), "Text")
+
+				Opt.nodes = {Btn, OptLabel, Ball}
+
+				Opt.visible = Query == "" or Opt.lower:find(Query, 1, true) ~= nil
+				Btn.Visible = Opt.visible
+				if Opt.visible then VisibleCount = VisibleCount + 1 end
+
+				local On
+				if MultiSelect then
+					On = InitialSet[Name] == true
+					if On then table.insert(SelectedValues, Name) end
+				else
+					On = CurrentOpt == nil and Selected ~= nil and Value == Selected
+					if On then CurrentOpt = Opt end
 				end
+				SetState(Opt, On, true)
 
-				GetOptions = function()
-					return Options
-				end
-
-				AddNewOptions = function(List, Clear)
-					if Clear then
-						for k, v in pairs(Options) do
-							if v.nodes and v.nodes[1] then
-								v.nodes[1]:Destroy()
-							end
-							table.clear(Options[k])
-							Options[k] = nil
-						end
-						table.clear(Options)
-						if MultiSelect then
-							table.clear(Selected)
-							table.clear(SelectedValues)
-						else
-							Selected = nil
-						end
-						UpdateLabel()
-					end
-					table.foreach(List, AddOption)
-					CallbackSelected()
-					UpdateSelected()
-				end
-
-				table.foreach(DOptions, AddOption)
-				CallbackSelected()
-				UpdateSelected()
-
-				SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
-					local query = SearchBox.Text:lower()
-					for Name, Opt in pairs(Options) do
-						if Opt.nodes and Opt.nodes[1] then
-							local matches = query == "" or tostring(Name):lower():find(query, 1, true)
-							Opt.nodes[1].Visible = matches ~= nil and matches ~= false
-						end
-					end
-					CalculateSize()
+				Btn.Activated:Connect(function()
+					SelectOpt(Opt)
 				end)
+
+				Resize()
 			end
+
+			local function RemoveOption(Opt)
+				if not Opt then return end
+				Options[Opt.Name] = nil
+				local idx = table.find(Order, Opt)
+				if idx then table.remove(Order, idx) end
+				if Opt.visible then VisibleCount = VisibleCount - 1 end
+				if MultiSelect then
+					if Opt.on then RemoveFromValues(Opt.Name) end
+				elseif CurrentOpt == Opt then
+					CurrentOpt, Selected = nil, nil
+				end
+				Opt.nodes[1]:Destroy()
+				UpdateLabel()
+				Resize()
+			end
+
+			local function AddNewOptions(List, Clear)
+				if Clear then
+					for _, Opt in ipairs(Order) do
+						Opt.nodes[1]:Destroy()
+					end
+					table.clear(Options)
+					table.clear(Order)
+					table.clear(SelectedValues)
+					table.clear(InitialSet)
+					VisibleCount, Selected, CurrentOpt = 0, nil, nil
+				end
+				for index, Value in pairs(List) do
+					AddOption(index, Value)
+				end
+				UpdateLabel()
+				Fire()
+			end
+
+			for index, Value in pairs(DOptions) do
+				AddOption(index, Value)
+			end
+			UpdateLabel()
+			Fire()
+
+			SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+				Query = SearchBox.Text:lower()
+				local Count = 0
+				for _, Opt in ipairs(Order) do
+					local Match = Query == "" or Opt.lower:find(Query, 1, true) ~= nil
+					if Opt.visible ~= Match then
+						Opt.visible = Match
+						Opt.nodes[1].Visible = Match
+					end
+					if Match then Count = Count + 1 end
+				end
+				VisibleCount = Count
+				Resize()
+			end)
 
 			Button.Activated:Connect(Minimize)
 			NoClickFrame.MouseButton1Down:Connect(function()
-				local mouse = PlayerMouse
-				local df = DropFrame.AbsolutePosition
-				local ds = DropFrame.AbsoluteSize
-				if mouse.X >= df.X and mouse.X <= df.X + ds.X and mouse.Y >= df.Y and mouse.Y <= df.Y + ds.Y then return end
-				Disable()
-			end)
-			NoClickFrame.MouseButton1Click:Connect(function()
-				local mouse = PlayerMouse
-				local df = DropFrame.AbsolutePosition
-				local ds = DropFrame.AbsoluteSize
-				if mouse.X >= df.X and mouse.X <= df.X + ds.X and mouse.Y >= df.Y and mouse.Y <= df.Y + ds.Y then return end
+				local df, ds = DropFrame.AbsolutePosition, DropFrame.AbsoluteSize
+				local mx, my = PlayerMouse.X, PlayerMouse.Y
+				if mx >= df.X and mx <= df.X + ds.X and my >= df.Y and my <= df.Y + ds.Y then return end
 				Disable()
 			end)
 			MainFrame:GetPropertyChangedSignal("Visible"):Connect(Disable)
-			SelectedFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(CalculatePos)
-			Button.Activated:Connect(CalculateSize)
-			ScrollFrame.ChildAdded:Connect(CalculateSize)
-			ScrollFrame.ChildRemoved:Connect(CalculateSize)
-			CalculatePos()
-			CalculateSize()
+			SelectedFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+				if NoClickFrame.Visible then CalculatePos() end
+			end)
 
 			local Dropdown = {}
 			function Dropdown:Visible(...) Funcs:ToggleVisible(Button, ...) end
-			function Dropdown:Destroy() Button:Destroy() end
-			function Dropdown:Callback(...) Funcs:InsertCallback(Callback, ...)(DMultiSelect and SelectedValues or Selected) end
+			function Dropdown:Destroy() Button:Destroy() NoClickFrame:Destroy() end
+			function Dropdown:Callback(...) Funcs:InsertCallback(Callback, ...)(MultiSelect and SelectedValues or Selected) end
 
 			function Dropdown:Add(...)
-				local NewOptions = {...}
-				if type(NewOptions[1]) == "table" then
-					table.foreach(NewOptions[1], function(_,Name) AddOption(Name) end)
-				else
-					table.foreach(NewOptions, function(_,Name) AddOption(Name) end)
+				local New = {...}
+				if type(New[1]) == "table" then New = New[1] end
+				for _, Name in pairs(New) do
+					AddOption(Name, Name)
 				end
 			end
 
 			function Dropdown:Remove(Option)
-				for index, Value in pairs(GetOptions()) do
-					if type(Option) == "number" and index == Option or Value.Name == Option then
-						RemoveOption(index, Value.Value)
-					end
-				end
+				RemoveOption(type(Option) == "number" and Order[Option] or Options[tostring(Option)])
 			end
 
 			function Dropdown:Select(Option)
-				local Options = GetOptions()
-				if DMultiSelect then
+				if MultiSelect then
 					if type(Option) == "table" then
-						for name in pairs(Selected) do Selected[name] = false end
-						SelectedValues = {}
-						for _, opt in pairs(Option) do
-							local name = tostring(opt)
-							if Options[name] then
-								Selected[name] = true
+						local Want = {}
+						table.clear(SelectedValues)
+						for _, v in pairs(Option) do
+							local name = tostring(v)
+							if Options[name] and not Want[name] then
+								Want[name] = true
 								table.insert(SelectedValues, name)
 							end
 						end
+						for _, Opt in ipairs(Order) do
+							SetState(Opt, Want[Opt.Name] == true)
+						end
 					else
-						local name = tostring(Option)
-						if Options[name] then
-							local on = not (Selected[name] == true)
-							Selected[name] = on
-							if on then
-								if not table.find(SelectedValues, name) then
-									table.insert(SelectedValues, name)
-								end
-							else
-								local idx = table.find(SelectedValues, name)
-								if idx then table.remove(SelectedValues, idx) end
-							end
+						local Opt = Options[tostring(Option)]
+						if Opt then
+							local On = not Opt.on
+							if On then table.insert(SelectedValues, Opt.Name) else RemoveFromValues(Opt.Name) end
+							SetState(Opt, On)
 						end
 					end
 				else
-					if type(Option) == "string" then
-						for _,Val in pairs(Options) do
-							if Val.Name == Option then
-								Selected = Val.Value
-							end
-						end
-					elseif type(Option) == "number" then
-						local i = 0
-						for _, Val in pairs(Options) do
-							i = i + 1
-							if i == Option then
-								Selected = Val.Value
-								break
-							end
-						end
+					local Opt = type(Option) == "number" and Order[Option] or Options[tostring(Option)]
+					if Opt then
+						if CurrentOpt and CurrentOpt ~= Opt then SetState(CurrentOpt, false) end
+						CurrentOpt = Opt
+						Selected = Opt.Value
+						SetState(Opt, true)
 					end
 				end
-				local Options2 = GetOptions()
-				local DefaultTrans = Theme["Panel Transparency"] or math.clamp(CurrentTransparency + 0.55, 0, 0.95)
-				for _, v in pairs(Options2) do
-					local on = DMultiSelect and (Selected[v.Name] == true) or (v.Value == Selected)
-					local nodes = v.nodes
-					if DMultiSelect then
-						nodes[1]:SetAttribute("Selected", false)
-						CreateTween({nodes[1], "BackgroundColor3", Theme["Color Hub 2"], 0.35})
-						CreateTween({nodes[1], "BackgroundTransparency", DefaultTrans, 0.35})
-						CreateTween({nodes[3], "BackgroundTransparency", on and 0 or 0.8, 0.35})
-						CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
-					else
-						nodes[1]:SetAttribute("Selected", on)
-						CreateTween({nodes[1], "BackgroundColor3", on and Theme["Color Theme"] or Theme["Color Hub 2"], 0.35})
-						CreateTween({nodes[1], "BackgroundTransparency", on and 0.85 or DefaultTrans, 0.35})
-						CreateTween({nodes[2], "TextTransparency", on and 0 or 0.4, 0.35})
-					end
-				end
-				if DMultiSelect then
-					ActiveLabel.Text = #SelectedValues > 0 and table.concat(SelectedValues, ", ") or "..."
-				else
-					ActiveLabel.Text = tostring(Selected or "...")
-				end
-				SetFlag(Flag, DMultiSelect and SelectedValues or tostring(Selected or ""))
+				UpdateLabel()
+				SetFlag(Flag, MultiSelect and SelectedValues or tostring(Selected or ""))
 			end
 
 			function Dropdown:Set(Val1, Clear)
@@ -5156,6 +5088,7 @@ function veltrolib:MakeWindow(Configs)
 
 			return Dropdown
 		end
+
 
 		function Tab:AddSlider(Configs)
 			local SName = Configs[1] or Configs.Name or Configs.Title or "Slider!"
