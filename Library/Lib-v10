@@ -4410,13 +4410,34 @@ function veltrolib:MakeWindow(Configs)
 			})
 			Make("Corner", ClickFlash, UDim.new(0, 3))
 
+			local UIS = game:GetService("UserInputService")
+			local Held, EndConn = false, nil
+
+			local function Release()
+				if EndConn then EndConn:Disconnect() EndConn = nil end
+				Held = false
+				CreateTween({ClickFlash, "BackgroundTransparency", 1, 0.2})
+			end
+
 			FButton.MouseButton1Down:Connect(function()
+				Held = true
 				ClickFlash.BackgroundTransparency = 0.55
+				if EndConn then EndConn:Disconnect() end
+				EndConn = UIS.InputEnded:Connect(function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1
+					or Input.UserInputType == Enum.UserInputType.Touch then
+						Release()
+					end
+				end)
+			end)
+
+			FButton.MouseLeave:Connect(function()
+				if Held then Release() end
 			end)
 
 			FButton.Activated:Connect(function()
 				ClickFlash.BackgroundTransparency = 0.55
-				CreateTween({ClickFlash, "BackgroundTransparency", 1, 0.2})
+				Release()
 				if BFlag then
 					IsPressed = not IsPressed
 					SetFlag(BFlag, IsPressed)
@@ -5111,7 +5132,6 @@ function veltrolib:MakeWindow(Configs)
 
 			return Dropdown
 		end
-
 
 		function Tab:AddSlider(Configs)
 			local SName = Configs[1] or Configs.Name or Configs.Title or "Slider!"
