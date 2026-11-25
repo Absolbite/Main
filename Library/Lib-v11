@@ -2280,13 +2280,11 @@ function veltrolib:MakeWindow(Configs)
 				Size = UD2(0, 14, 0, 14), Position = UD2(1, -8, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), Image = "rbxassetid://10709790948", BackgroundTransparency = 1
 			})
 			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
-			local DropFrame = Create("Frame", NoClick, {
-				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.1, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0, 0),
+			local DropFrame = InsertTheme(Create("Frame", NoClick, {
+				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.05, BackgroundColor3 = Theme["Color Hub 2"], AnchorPoint = Vector2.new(0, 0),
 				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
-			})
+			}), "Main")
 			Make("Corner", DropFrame)
-			Make("Stroke", DropFrame)
-			Make("Gradient", DropFrame, {Rotation = 60})
 
 			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
 				Size = UD2(1, -10, 0, 22), Position = UD2(0, 5, 0, 4), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "SearchHolder", ZIndex = Z
@@ -2322,12 +2320,12 @@ function veltrolib:MakeWindow(Configs)
 
 			local function Resize() end
 			local function DrawerSize(w)
-				return UDim2.fromOffset(w, Containers.AbsoluteSize.Y / UIScale - PAGE_TITLE_RESERVED)
+				return UDim2.fromOffset(w, Containers.AbsoluteSize.Y / UIScale)
 			end
 			local function CalcPos()
 				local cp, cs = Containers.AbsolutePosition, Containers.AbsoluteSize
 				DropFrame.AnchorPoint = Vector2.new(1, 0)
-				DropFrame.Position = UDim2.fromOffset((cp.X + cs.X) / UIScale, cp.Y / UIScale + PAGE_TITLE_RESERVED)
+				DropFrame.Position = UDim2.fromOffset((cp.X + cs.X) / UIScale, cp.Y / UIScale)
 				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
 			end
 			local function Disable()
