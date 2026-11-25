@@ -946,7 +946,7 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "8.1.0"},
+	Info = {Version = "11.0.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
@@ -2280,11 +2280,15 @@ function veltrolib:MakeWindow(Configs)
 				Size = UD2(0, 14, 0, 14), Position = UD2(1, -8, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), Image = "rbxassetid://10709790948", BackgroundTransparency = 1
 			})
 			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
+			local Dim = Create("Frame", NoClick, {
+				BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1, BorderSizePixel = 0, Active = false, Name = "Dim", ZIndex = Z
+			})
 			local DropFrame = InsertTheme(Create("Frame", NoClick, {
-				Size = UD2(0, 0, 0, 0), BackgroundTransparency = PanelT(0.35), BackgroundColor3 = Theme["Color Hub 2"], AnchorPoint = Vector2.new(0, 0),
+				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.85, BackgroundColor3 = Theme["Color Theme"], AnchorPoint = Vector2.new(0, 0),
 				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
-			}), "SectionFrame")
+			}), "Theme")
 			Make("Corner", DropFrame)
+			InsertTheme(Create("UIStroke", DropFrame, {Color = Theme["Color Theme"], Thickness = 1, ApplyStrokeMode = "Border"}), "Theme")
 
 			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
 				Size = UD2(1, -10, 0, 22), Position = UD2(0, 5, 0, 4), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "SearchHolder", ZIndex = Z
@@ -2327,11 +2331,14 @@ function veltrolib:MakeWindow(Configs)
 				DropFrame.AnchorPoint = Vector2.new(1, 0)
 				DropFrame.Position = UDim2.fromOffset((cp.X + cs.X) / UIScale, cp.Y / UIScale)
 				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
+				Dim.Position = UDim2.fromOffset(cp.X / UIScale, cp.Y / UIScale)
+				Dim.Size = UDim2.fromOffset(cs.X / UIScale, cs.Y / UIScale)
 			end
 			local function Disable()
 				if not NoClick.Visible then return end
 				WaitDrop = true
 				CreateTween({Arrow, "ImageColor3", Color3.new(1, 1, 1), 0.2})
+				CreateTween({Dim, "BackgroundTransparency", 1, 0.2})
 				CreateTween({DropFrame, "Size", DrawerSize(0), 0.2, true})
 				Arrow.Image = "rbxassetid://10709790948"
 				NoClick.Visible = false
@@ -2347,6 +2354,7 @@ function veltrolib:MakeWindow(Configs)
 				NoClick.Visible = true
 				Arrow.Image = "rbxassetid://10709791523"
 				CreateTween({Arrow, "ImageColor3", Theme["Color Theme"], 0.2})
+				CreateTween({Dim, "BackgroundTransparency", 0.5, 0.2})
 				CreateTween({DropFrame, "Size", DrawerSize(DropWidth), 0.2, true})
 				WaitDrop = false
 			end
