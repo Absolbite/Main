@@ -946,7 +946,6 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	DrawerSide = "Left",
 	Info = {Version = "8.1.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
@@ -2323,13 +2322,12 @@ function veltrolib:MakeWindow(Configs)
 
 			local function Resize() end
 			local function DrawerSize(w)
-				return UDim2.fromOffset(w, MainFrame.AbsoluteSize.Y / UIScale)
+				return UDim2.fromOffset(w, Containers.AbsoluteSize.Y / UIScale - PAGE_TITLE_RESERVED)
 			end
 			local function CalcPos()
-				local mp, ms = MainFrame.AbsolutePosition, MainFrame.AbsoluteSize
-				local left = veltrolib.DrawerSide ~= "Right"
-				DropFrame.AnchorPoint = Vector2.new(left and 0 or 1, 0)
-				DropFrame.Position = UDim2.fromOffset((mp.X + (left and 0 or ms.X)) / UIScale, mp.Y / UIScale)
+				local cp = Containers.AbsolutePosition
+				DropFrame.AnchorPoint = Vector2.zero
+				DropFrame.Position = UDim2.fromOffset(cp.X / UIScale, cp.Y / UIScale + PAGE_TITLE_RESERVED)
 				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
 			end
 			local function Disable()
@@ -2503,7 +2501,7 @@ function veltrolib:MakeWindow(Configs)
 			end)
 			MainFrame:GetPropertyChangedSignal("Visible"):Connect(Disable)
 			for _, sig in {"AbsolutePosition", "AbsoluteSize"} do
-				MainFrame:GetPropertyChangedSignal(sig):Connect(function() if NoClick.Visible and not WaitDrop then CalcPos() end end)
+				Containers:GetPropertyChangedSignal(sig):Connect(function() if NoClick.Visible and not WaitDrop then CalcPos() end end)
 			end
 
 			local Dropdown = {}
