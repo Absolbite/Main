@@ -1182,7 +1182,7 @@ local ThemeApply = {
 	DropdownOpt = function(i)
 		local on = i:GetAttribute("Selected") == true
 		i.BackgroundColor3 = Theme["Color Theme"]
-		i.BackgroundTransparency = on and 0.7 or 0.85
+		i.BackgroundTransparency = on and 0.7 or 1
 	end
 }
 
@@ -1390,9 +1390,9 @@ function veltrolib:MakeWindow(Configs)
 
 	local Title = InsertTheme(Create("TextLabel", TopBar, {
 		Position = UD2(0, 15, 0.5), AnchorPoint = Vector2.new(0, 0.5), AutomaticSize = "X", Size = UD2(0, 0, 0, 28), Text = WTitle,
-		TextXAlignment = "Left", TextYAlignment = "Center", TextSize = 12, TextColor3 = Bright(Theme["Color Theme"], 60),
+		TextXAlignment = "Left", TextYAlignment = "Center", TextSize = 12, TextColor3 = Theme["Color Theme"],
 		BackgroundTransparency = 1, Font = Font.GothamBold, Name = "Title"
-	}), "ThemeText")
+	}), "Theme")
 	local SubTitle = InsertTheme(Create("TextLabel", TopBar, {
 		AutomaticSize = "X", Size = UD2(0, 0, 0, 28), AnchorPoint = Vector2.new(0, 0.5), Position = UD2(0, 23 + w1, 0.5), Text = WMiniText,
 		TextColor3 = Theme["Color Dark Text"], BackgroundTransparency = 1, TextXAlignment = "Left", TextYAlignment = "Center", TextSize = 8, Font = Font.Gotham, Name = "SubTitle"
@@ -2267,7 +2267,7 @@ function veltrolib:MakeWindow(Configs)
 			local Callback = Funcs.GetCallback(C, 4)
 
 			local Z, DropWidth = 100, 152
-			local OptTrans = 0.85
+			local OptTrans = 1
 			local Button = ButtonFrame(Container, C[1] or C.Name or C.Title or "Dropdown", C.Desc or C.Description or "", UD2(1, -180))
 
 			local SelFrame = InsertTheme(Create("Frame", Button, {
@@ -2302,11 +2302,14 @@ function veltrolib:MakeWindow(Configs)
 				Size = UD2(1, -24, 1, 0), Position = UD2(0, 20, 0, 0), BackgroundTransparency = 1, Font = Font.Gotham, TextSize = 9, TextColor3 = Theme["Color Text"],
 				PlaceholderText = "Search...", PlaceholderColor3 = Theme["Color Dark Text"], Text = "", ClearTextOnFocus = false, TextXAlignment = "Left", ZIndex = Z
 			}), "Text")
+			Make("Corner", InsertTheme(Create("Frame", DropFrame, {
+				Size = UD2(1, -10, 1, -35), Position = UD2(0, 5, 0, 30), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "OptionsBacking", ZIndex = Z
+			}), "Theme"), UD(0, 4))
 			local ScrollFrame = InsertTheme(Create("ScrollingFrame", DropFrame, {
-				ScrollBarImageColor3 = Theme["Color Theme"], Size = UD2(1, 0, 1, -30), Position = UD2(0, 0, 0, 30), ScrollBarThickness = 1.5, BackgroundTransparency = 1,
+				ScrollBarImageColor3 = Theme["Color Theme"], Size = UD2(1, -10, 1, -35), Position = UD2(0, 5, 0, 30), ScrollBarThickness = 1.5, BackgroundTransparency = 1,
 				BorderSizePixel = 0, CanvasSize = UDim2.new(), ScrollingDirection = "Y", AutomaticCanvasSize = "Y", Active = true, ZIndex = Z
 			}, {
-				Create("UIPadding", {PaddingLeft = UD(0, 5), PaddingRight = UD(0, 5), PaddingTop = UD(0, 5), PaddingBottom = UD(0, 5)}),
+				Create("UIPadding", {PaddingLeft = UD(0, 4), PaddingRight = UD(0, 4), PaddingTop = UD(0, 4), PaddingBottom = UD(0, 4)}),
 				Create("UIListLayout", {Padding = UD(0, 4)})
 			}), "ScrollBar")
 
