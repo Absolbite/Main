@@ -946,7 +946,7 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "8.1.0"},
+	Info = {Version = "11.0.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
