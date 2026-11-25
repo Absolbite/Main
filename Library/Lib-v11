@@ -946,7 +946,7 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "11.0.0"},
+	Info = {Version = "8.1.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
@@ -2281,9 +2281,9 @@ function veltrolib:MakeWindow(Configs)
 			})
 			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
 			local DropFrame = InsertTheme(Create("Frame", NoClick, {
-				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.05, BackgroundColor3 = Theme["Color Hub 2"], AnchorPoint = Vector2.new(0, 0),
+				Size = UD2(0, 0, 0, 0), BackgroundTransparency = PanelT(0.35), BackgroundColor3 = Theme["Color Hub 2"], AnchorPoint = Vector2.new(0, 0),
 				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
-			}), "Main")
+			}), "SectionFrame")
 			Make("Corner", DropFrame)
 
 			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
