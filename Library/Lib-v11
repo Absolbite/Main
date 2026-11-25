@@ -946,7 +946,7 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "8.1.0"},
+	Info = {Version = "11.0.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
@@ -2325,9 +2325,9 @@ function veltrolib:MakeWindow(Configs)
 				return UDim2.fromOffset(w, Containers.AbsoluteSize.Y / UIScale - PAGE_TITLE_RESERVED)
 			end
 			local function CalcPos()
-				local cp = Containers.AbsolutePosition
-				DropFrame.AnchorPoint = Vector2.zero
-				DropFrame.Position = UDim2.fromOffset(cp.X / UIScale, cp.Y / UIScale + PAGE_TITLE_RESERVED)
+				local cp, cs = Containers.AbsolutePosition, Containers.AbsoluteSize
+				DropFrame.AnchorPoint = Vector2.new(1, 0)
+				DropFrame.Position = UDim2.fromOffset((cp.X + cs.X) / UIScale, cp.Y / UIScale + PAGE_TITLE_RESERVED)
 				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
 			end
 			local function Disable()
