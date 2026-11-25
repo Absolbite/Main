@@ -1181,8 +1181,8 @@ local ThemeApply = {
 	ScrollBar = function(i) Col(i, Theme["Color Theme"]) end,
 	DropdownOpt = function(i)
 		local on = i:GetAttribute("Selected") == true
-		i.BackgroundColor3 = on and Theme["Color Theme"] or Theme["Color Hub 2"]
-		i.BackgroundTransparency = on and 0.85 or PanelT(0.55)
+		i.BackgroundColor3 = Theme["Color Theme"]
+		i.BackgroundTransparency = on and 0.7 or 0.85
 	end
 }
 
@@ -1268,12 +1268,14 @@ function veltrolib:SetTheme(NewTheme)
 	end
 end
 
+local Drawers = setmetatable({}, {__mode = "k"})
 function veltrolib:SetTransparency(v)
 	v = math.clamp(tonumber(v) or 0, 0, 0.95)
 	CurrentTransparency = v
 	veltrolib.Save.Transparency = v
 	SaveJson(veltrolib.Save)
 	if _MainFrame then _MainFrame.Transparency = v end
+	for d in Drawers do d.BackgroundTransparency = v end
 end
 
 function veltrolib:SetScale(s)
@@ -2265,7 +2267,7 @@ function veltrolib:MakeWindow(Configs)
 			local Callback = Funcs.GetCallback(C, 4)
 
 			local Z, DropWidth = 100, 152
-			local OptTrans = PanelT(0.55)
+			local OptTrans = 0.85
 			local Button = ButtonFrame(Container, C[1] or C.Name or C.Title or "Dropdown", C.Desc or C.Description or "", UD2(1, -180))
 
 			local SelFrame = InsertTheme(Create("Frame", Button, {
@@ -2280,16 +2282,14 @@ function veltrolib:MakeWindow(Configs)
 				Size = UD2(0, 14, 0, 14), Position = UD2(1, -8, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), Image = "rbxassetid://10709790948", BackgroundTransparency = 1
 			})
 			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
-			local Backing = InsertTheme(Create("Frame", NoClick, {
-				BackgroundColor3 = Theme["Color Hub 2"], BackgroundTransparency = 1, BorderSizePixel = 0, Active = false, Name = "Backing", ZIndex = Z
-			}), "Main")
-			Make("Corner", Backing)
 			local DropFrame = InsertTheme(Create("Frame", NoClick, {
-				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.85, BackgroundColor3 = Theme["Color Theme"], AnchorPoint = Vector2.new(0, 0),
+				Size = UD2(0, 0, 0, 0), BackgroundTransparency = CurrentTransparency, BackgroundColor3 = Theme["Color Hub 2"], AnchorPoint = Vector2.new(0, 0),
 				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
-			}), "Theme")
-			Make("Corner", DropFrame)
-			InsertTheme(Create("UIStroke", DropFrame, {Color = Theme["Color Theme"], Thickness = 1, ApplyStrokeMode = "Border"}), "Theme")
+			}), "Main")
+			Make("Corner", DropFrame, UD(0, 7))
+			Make("Gradient", DropFrame, {Rotation = 45})
+			Drawers[DropFrame] = true
+			DropFrame.Destroying:Once(function() Drawers[DropFrame] = nil end)
 
 			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
 				Size = UD2(1, -10, 0, 22), Position = UD2(0, 5, 0, 4), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "SearchHolder", ZIndex = Z
@@ -2333,15 +2333,10 @@ function veltrolib:MakeWindow(Configs)
 				DropFrame.Position = UDim2.fromOffset((cp.X + cs.X) / UIScale, cp.Y / UIScale)
 				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
 			end
-			local function SyncUnder()
-				Backing.AnchorPoint, Backing.Position, Backing.Size = DropFrame.AnchorPoint, DropFrame.Position, DropFrame.Size
-			end
-			for _, sig in {"Size", "Position", "AnchorPoint"} do DropFrame:GetPropertyChangedSignal(sig):Connect(SyncUnder) end
 			local function Disable()
 				if not NoClick.Visible then return end
 				WaitDrop = true
 				CreateTween({Arrow, "ImageColor3", Color3.new(1, 1, 1), 0.2})
-				CreateTween({Backing, "BackgroundTransparency", 1, 0.2})
 				CreateTween({DropFrame, "Size", DrawerSize(0), 0.2, true})
 				Arrow.Image = "rbxassetid://10709790948"
 				NoClick.Visible = false
@@ -2357,7 +2352,6 @@ function veltrolib:MakeWindow(Configs)
 				NoClick.Visible = true
 				Arrow.Image = "rbxassetid://10709791523"
 				CreateTween({Arrow, "ImageColor3", Theme["Color Theme"], 0.2})
-				CreateTween({Backing, "BackgroundTransparency", 0, 0.2})
 				CreateTween({DropFrame, "Size", DrawerSize(DropWidth), 0.2, true})
 				WaitDrop = false
 			end
@@ -2397,8 +2391,8 @@ function veltrolib:MakeWindow(Configs)
 				Opt.on = On
 				local Btn, Label, Ball = unpack(Opt.nodes, 1, 3)
 				Btn:SetAttribute("Selected", On)
-				local Trans = On and 0.85 or OptTrans
-				Btn.BackgroundColor3 = On and Theme["Color Theme"] or Theme["Color Hub 2"]
+				local Trans = On and 0.7 or OptTrans
+				Btn.BackgroundColor3 = Theme["Color Theme"]
 				if Instant or not On then
 					Btn.BackgroundTransparency = Trans
 					Label.TextTransparency = On and 0 or 0.4
