@@ -1,0 +1,2753 @@
+local function GS(n) return game:GetService(n) end
+local TextService, UIS, TweenService, HttpService, RunService, CoreGui, Players =
+	GS"TextService", GS"UserInputService", GS"TweenService", GS"HttpService", GS"RunService", GS"CoreGui", GS"Players"
+local Player = Players.LocalPlayer
+local PlayerMouse = Player:GetMouse()
+local C3, CSK = Color3.fromRGB, ColorSequenceKeypoint.new
+local Font, UD2, UD = Enum.Font, UDim2.new, UDim.new
+
+local THEME_DATA = {
+Darker={25,25,25,32.5,32.5,32.5,25,25,25,30,30,30,40,40,40,88,101,242,243,243,243,180,180,180},
+Dark={40,40,40,47.5,47.5,47.5,40,40,40,45,45,45,65,65,65,65,150,255,245,245,245,190,190,190},
+Purple={27.5,25,30,32.5,32.5,32.5,27.5,25,30,30,30,30,40,40,40,150,0,255,240,240,240,180,180,180},
+Ocean={10,30,50,15,40,65,10,30,50,12,35,55,20,55,80,0,180,220,220,240,255,140,180,210},
+Crimson={30,10,10,40,15,15,30,10,10,35,12,12,55,20,20,220,40,40,255,230,230,200,160,160},
+Emerald={10,28,18,14,38,24,10,28,18,12,33,21,20,55,35,0,200,100,220,255,235,140,200,165},
+Sunset={35,18,10,45,25,12,35,18,10,40,22,12,65,38,18,255,120,30,255,240,220,210,175,140},
+Midnight={8,8,18,12,12,25,8,8,18,10,10,22,22,22,45,100,80,255,220,218,255,155,150,210},
+Rose={32,14,24,42,20,32,32,14,24,38,17,28,60,28,46,255,80,140,255,228,240,210,160,185},
+Monochrome={18,18,18,26,26,26,18,18,18,22,22,22,50,50,50,200,200,200,240,240,240,170,170,170},
+Arctic={15,25,35,20,34,48,15,25,35,18,30,42,30,55,75,130,220,255,225,245,255,155,200,230},
+Amber={32,22,5,42,30,8,32,22,5,38,26,6,65,48,12,255,185,30,255,245,215,210,180,120},
+Neon={5,5,10,8,8,16,5,5,10,6,6,13,15,15,30,0,255,128,210,255,235,130,210,170},
+Sakura={38,20,28,50,28,38,38,20,28,44,24,33,72,40,56,255,160,190,255,235,242,215,170,190},
+Forest={12,22,14,17,30,19,12,22,14,14,26,16,25,48,28,80,200,80,215,245,215,140,195,140},
+Lava={28,8,4,38,12,6,28,8,4,33,10,5,60,20,10,255,70,20,255,225,215,210,155,135},
+Aqua={8,28,32,11,38,44,8,28,32,10,33,38,18,60,68,0,220,200,210,255,252,130,205,200},
+Sand={35,30,20,46,40,27,35,30,20,40,35,23,68,60,38,220,185,100,255,248,225,200,180,140},
+Lilac={25,18,35,34,25,46,25,18,35,30,22,40,52,38,70,195,140,255,240,230,255,185,160,220},
+Slate={18,22,28,24,30,38,18,22,28,21,26,33,38,48,60,100,160,220,220,230,245,150,170,200},
+Toxic={12,20,8,16,28,10,12,20,8,14,24,9,26,46,16,160,255,0,230,255,200,160,210,100},
+Copper={28,16,8,38,22,11,28,16,8,33,19,10,58,34,18,200,115,60,255,235,220,200,160,130},
+Glacier={16,28,36,22,38,48,16,28,36,19,33,42,32,58,75,100,210,240,215,242,255,140,190,220},
+Obsidian={10,10,12,15,14,18,10,10,12,12,12,15,28,26,34,160,140,255,225,222,255,155,148,200},
+Peach={36,20,14,48,28,18,36,20,14,42,24,16,70,42,28,255,165,110,255,240,230,215,175,150},
+Cobalt={8,14,35,11,19,46,8,14,35,10,16,40,18,30,70,55,115,255,215,225,255,140,160,220},
+Infrared={30,10,20,40,14,28,30,10,20,35,12,24,60,22,42,255,50,100,255,220,235,210,150,175},
+Teal={8,26,26,11,35,35,8,26,26,10,30,30,18,55,55,0,190,175,210,252,248,130,200,192},
+Gold={28,22,6,38,30,9,28,22,6,33,26,7,58,46,14,255,210,50,255,250,220,210,188,130},
+Void={4,4,8,6,6,12,4,4,8,5,5,10,14,12,22,120,60,255,210,200,255,140,125,200},
+Mint={8,28,22,12,38,30,8,28,22,10,33,26,18,60,46,50,235,170,210,255,240,130,205,175},
+Blush={38,18,26,50,24,34,38,18,26,44,21,30,72,36,52,255,130,170,255,232,242,215,165,190},
+Dusk={20,14,30,28,20,42,20,14,30,24,17,36,45,32,68,210,100,255,238,225,255,175,150,220},
+Storm={18,20,28,24,27,38,18,20,28,21,24,33,40,46,65,130,180,255,218,228,255,148,168,215},
+Rust={30,12,6,42,17,8,30,12,6,36,14,7,65,28,14,215,90,40,255,228,215,205,158,130},
+Jade={8,24,20,11,33,27,8,24,20,10,28,24,18,54,44,0,180,140,210,252,245,130,200,185},
+Horizon={32,14,18,42,20,26,18,18,36,28,16,24,55,32,48,255,100,80,255,230,225,210,162,155},
+Plum={26,10,30,36,14,42,26,10,30,31,12,36,56,22,66,185,60,210,240,218,255,185,145,215},
+IceBlue={10,22,38,14,30,52,10,22,38,12,26,45,22,50,82,90,200,255,215,242,255,140,190,230},
+Mocha={28,18,12,38,26,17,28,18,12,33,22,14,60,42,26,200,150,100,255,242,228,200,172,140},
+Magenta={30,6,26,40,8,36,30,6,26,35,7,31,65,14,58,255,40,200,255,215,248,210,140,200},
+Carbon={14,14,14,20,20,20,14,14,14,17,17,17,40,40,40,255,80,0,242,242,242,170,170,170},
+Marine={6,18,38,8,24,52,6,18,38,7,21,45,14,42,82,0,160,230,210,238,255,130,182,220},
+Parchment={38,32,22,50,42,30,38,32,22,44,37,26,74,64,44,230,195,120,255,248,228,210,188,148},
+Indigo={12,10,40,17,14,55,12,10,40,14,12,48,26,22,88,90,80,255,220,218,255,148,142,220},
+Scarlet={32,6,6,44,8,8,32,6,6,38,7,7,70,14,14,255,30,30,255,222,222,210,148,148},
+Blossom={36,16,28,48,22,38,36,16,28,42,19,33,70,34,58,255,180,220,255,238,248,218,172,200},
+Eclipse={6,6,16,10,8,22,6,6,16,8,7,19,20,18,44,170,130,255,228,222,255,155,142,215},
+Olive={22,24,10,30,33,14,22,24,10,26,28,12,48,52,22,175,190,60,238,242,210,178,185,140},
+Frostbite={8,20,38,12,28,52,18,12,36,10,24,44,20,46,80,80,220,255,215,248,255,138,195,232},
+Ember={34,14,6,46,20,8,34,14,6,40,17,7,72,32,14,255,140,40,255,238,215,215,175,132},
+Nautical={8,20,30,10,28,42,8,20,30,9,24,36,16,46,66,255,200,50,255,248,215,200,185,130},
+Vine={14,24,12,19,33,16,14,24,12,16,28,14,28,52,24,100,220,60,220,250,210,145,200,130},
+Cinder={16,14,14,22,20,18,16,14,14,19,17,16,44,40,36,240,120,60,248,238,228,200,175,155},
+Cosmos={6,4,18,10,6,26,6,4,18,8,5,22,18,12,48,140,200,255,220,232,255,148,168,225},
+Mushroom={26,22,20,35,30,27,26,22,20,30,26,23,56,48,42,190,165,130,248,242,232,195,178,158},
+Pixel={8,8,8,14,14,14,8,8,8,11,11,11,28,28,28,0,255,60,0,255,60,0,180,44},
+Holographic={14,18,30,22,18,38,18,24,32,18,20,34,36,40,70,160,240,255,228,248,255,155,200,230},
+Candy={36,10,28,48,14,38,36,10,28,42,12,33,72,22,60,255,80,200,255,225,250,215,160,205},
+Titan={12,12,18,18,18,26,12,12,18,15,15,22,32,32,48,180,180,255,230,230,255,155,155,210},
+Flame={30,8,4,44,12,6,24,10,6,37,10,5,70,20,10,255,60,0,255,228,218,210,148,120},
+Mist={28,30,34,36,40,46,28,30,34,32,35,40,55,60,70,165,190,220,228,235,245,160,175,198},
+Orchid={28,10,34,38,14,46,28,10,34,33,12,40,60,22,74,220,100,255,245,220,255,192,152,225},
+Bronze={26,14,6,36,20,8,26,14,6,31,17,7,58,32,14,205,130,70,255,238,220,200,165,125},
+Neptune={6,16,36,8,22,50,6,16,36,7,19,43,14,38,80,60,200,200,210,248,252,130,195,210},
+Glacier2={20,30,45,26,40,60,20,30,45,23,35,52,40,65,95,150,230,255,220,248,255,148,200,235},
+Ruby={32,8,14,44,11,19,32,8,14,38,9,16,70,18,30,255,50,80,255,220,228,210,145,158},
+Hazel={26,20,12,35,28,16,26,20,12,30,24,14,56,45,26,190,155,90,250,242,225,195,172,130},
+Moonlight={12,12,24,16,16,34,12,12,24,14,14,29,28,28,58,200,210,255,232,235,255,165,170,225},
+Citrus={28,24,6,38,34,8,28,24,6,33,29,7,60,54,14,255,225,0,255,252,210,210,195,130},
+Lagoon={6,22,28,8,30,38,6,22,28,7,26,33,14,50,64,0,210,175,210,255,248,130,202,192},
+Phantom={10,8,16,14,11,22,10,8,16,12,9,19,26,20,42,130,255,200,218,255,240,142,210,180},
+Tangerine={32,16,6,44,22,8,32,16,6,38,19,7,70,36,14,255,160,0,255,242,215,215,178,125},
+Electric={6,10,30,8,14,42,6,10,30,7,12,36,14,24,68,60,140,255,215,235,255,138,178,240},
+Sepia={30,22,14,40,30,18,30,22,14,35,26,16,64,48,30,200,160,110,255,242,225,200,175,145},
+Haze={22,16,26,30,22,36,22,16,26,26,19,31,48,36,58,180,140,220,240,230,255,178,155,210},
+Iron={20,20,22,28,28,30,20,20,22,24,24,26,48,48,52,185,195,210,235,238,245,162,168,182},
+Meadow={12,24,14,17,33,19,12,24,14,14,28,16,26,52,30,120,210,90,222,250,214,148,202,132},
+Vapor={14,8,28,22,12,40,8,14,32,18,10,34,36,20,64,255,80,255,255,220,255,210,155,225},
+Nordic={16,20,28,22,28,38,16,20,28,19,24,33,36,46,62,100,200,240,220,240,252,145,185,218},
+Velvet={28,8,20,38,11,28,28,8,20,33,9,24,62,18,46,200,50,140,255,218,240,210,145,185},
+Dawn={36,20,16,48,28,22,28,18,24,42,24,19,74,44,34,255,180,130,255,242,232,215,180,158},
+Phosphor={6,14,8,8,20,11,6,14,8,7,17,9,14,36,18,50,255,80,200,255,210,120,205,140},
+Noir={6,6,6,10,10,10,6,6,6,8,8,8,22,22,22,240,240,240,248,248,248,170,170,170},
+Wildfire={32,12,4,44,18,6,28,14,8,38,15,5,70,28,10,255,110,20,255,235,218,215,165,130},
+Polar={18,28,40,24,38,55,18,28,40,21,33,47,38,60,86,180,240,255,228,248,255,155,200,232},
+Shadow={8,8,10,12,12,15,8,8,10,10,10,12,24,24,30,255,255,80,255,255,220,200,200,145},
+Prism={10,14,26,16,20,38,14,10,30,13,17,32,26,34,64,100,255,255,215,252,255,138,200,220},
+Cacao={24,14,8,33,20,11,24,14,8,28,17,9,52,32,18,175,120,80,255,240,228,195,162,132},
+Starlight={8,8,20,12,12,30,8,8,20,10,10,25,22,22,52,255,240,160,255,252,232,210,198,155},
+Seafoam={8,24,22,11,33,30,8,24,22,9,28,26,18,54,50,80,230,190,210,255,248,130,202,190},
+Lapis={10,16,44,14,22,60,10,16,44,12,19,52,22,36,96,80,150,255,215,232,255,138,172,235},
+Spice={30,14,8,40,20,10,30,14,8,35,17,9,64,32,18,225,100,50,255,235,220,210,160,132},
+Matrix={0,10,0,0,14,0,0,10,0,0,12,0,0,30,0,0,255,70,180,255,190,0,180,44},
+Bismuth={18,16,24,24,22,32,18,16,24,21,19,28,40,36,54,160,210,200,228,242,240,155,192,185},
+Glow={4,8,22,6,12,32,4,8,22,5,10,27,10,20,54,80,200,255,210,240,255,130,185,230},
+Terra={22,16,10,30,22,14,22,16,10,26,19,12,48,36,22,160,120,70,248,238,222,192,165,130},
+Rift={10,6,22,14,8,32,10,6,22,12,7,27,24,14,54,150,80,255,228,215,255,158,135,220},
+Basalt={16,14,12,22,20,17,16,14,12,19,17,14,38,34,28,160,155,145,240,236,230,170,162,150},
+Wildberry={30,8,20,42,11,28,30,8,20,36,9,24,66,18,46,240,60,140,255,218,238,210,145,180},
+White={255,255,255,250,250,250,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,225,225,225}
+}
+local Themes = {}
+for name, r in THEME_DATA do
+	local function c(i) return C3(r[i], r[i + 1], r[i + 2]) end
+	Themes[name] = {
+		["Color Hub 1"] = ColorSequence.new({CSK(0, c(1)), CSK(0.5, c(4)), CSK(1, c(7))}),
+		["Color Hub 2"] = c(10), ["Color Stroke"] = c(13), ["Color Theme"] = c(16),
+		["Color Text"] = c(19), ["Color Dark Text"] = c(22)
+	}
+end
+Themes.White["Stroke Transparency"] = 1
+Themes.White["Panel Transparency"] = 0.85
+
+local Icons = {}
+for n, i in ([[
+accessibility 10709751939
+activity 10709752035
+airvent 10709752131
+airplay 10709752254
+alarmcheck 10709752405
+alarmclock 10709752630
+alarmclockoff 10709752508
+alarmminus 10709752732
+alarmplus 10709752825
+album 10709752906
+alertcircle 10709752996
+alertoctagon 10709753064
+alerttriangle 10709753149
+aligncenter 10709753570
+aligncenterhorizontal 10709753272
+aligncentervertical 10709753421
+alignendhorizontal 10709753692
+alignendvertical 10709753808
+alignhorizontaldistributecenter 10747779791
+alignhorizontaldistributeend 10747784534
+alignhorizontaldistributestart 10709754118
+alignhorizontaljustifycenter 10709754204
+alignhorizontaljustifyend 10709754317
+alignhorizontaljustifystart 10709754436
+alignhorizontalspacearound 10709754590
+alignhorizontalspacebetween 10709754749
+alignjustify 10709759610
+alignleft 10709759764
+alignright 10709759895
+alignstarthorizontal 10709760051
+alignstartvertical 10709760244
+alignverticaldistributecenter 10709760351
+alignverticaldistributeend 10709760434
+alignverticaldistributestart 10709760612
+alignverticaljustifycenter 10709760814
+alignverticaljustifyend 10709761003
+alignverticaljustifystart 10709761176
+alignverticalspacearound 10709761324
+alignverticalspacebetween 10709761434
+anchor 10709761530
+angry 10709761629
+annoyed 10709761722
+aperture 10709761813
+apple 10709761889
+archive 10709762233
+archiverestore 10709762058
+armchair 10709762327
+arrowbigdown 10747796644
+arrowbigleft 10709762574
+arrowbigright 10709762727
+arrowbigup 10709762879
+arrowdown 10709767827
+arrowdowncircle 10709763034
+arrowdownleft 10709767656
+arrowdownright 10709767750
+arrowleft 10709768114
+arrowleftcircle 10709767936
+arrowleftright 10709768019
+arrowright 10709768347
+arrowrightcircle 10709768226
+arrowup 10709768939
+arrowupcircle 10709768432
+arrowupdown 10709768538
+arrowupleft 10709768661
+arrowupright 10709768787
+asterisk 10709769095
+atsign 10709769286
+award 10709769406
+axe 10709769508
+axis3d 10709769598
+baby 10709769732
+backpack 10709769841
+baggageclaim 10709769935
+banana 10709770005
+banknote 10709770178
+barchart 10709773755
+barchart2 10709770317
+barchart3 10709770431
+barchart4 10709770560
+barcharthorizontal 10709773669
+barcode 10747360675
+baseline 10709773863
+bath 10709773963
+battery 10709774640
+batterycharging 10709774068
+batteryfull 10709774206
+batterylow 10709774370
+batterymedium 10709774513
+beaker 10709774756
+bed 10709775036
+beddouble 10709774864
+bedsingle 10709774968
+beer 10709775167
+bell 10709775704
+bellminus 10709775241
+belloff 10709775320
+bellplus 10709775448
+bellring 10709775560
+bike 10709775894
+binary 10709776050
+bitcoin 10709776126
+bluetooth 10709776655
+bluetoothconnected 10709776240
+bluetoothoff 10709776344
+bluetoothsearching 10709776501
+bold 10747813908
+bomb 10709781460
+bone 10709781605
+book 10709781824
+bookopen 10709781717
+bookmark 10709782154
+bookmarkminus 10709781919
+bookmarkplus 10709782044
+bot 10709782230
+box 10709782497
+boxselect 10709782342
+boxes 10709782582
+briefcase 10709782662
+brush 10709782758
+bug 10709782845
+building 10709783051
+building2 10709782939
+bus 10709783137
+cake 10709783217
+calculator 10709783311
+calendar 10709789505
+calendarcheck 10709783474
+calendarcheck2 10709783392
+calendarclock 10709783577
+calendardays 10709783673
+calendarheart 10709783835
+calendarminus 10709783959
+calendaroff 10709788784
+calendarplus 10709788937
+calendarrange 10709789053
+calendarsearch 10709789200
+calendarx 10709789407
+calendarx2 10709789329
+camera 10709789686
+cameraoff 10747822677
+car 10709789810
+carrot 10709789960
+cast 10709790097
+charge 10709790202
+check 10709790644
+checkcircle 10709790387
+checkcircle2 10709790298
+checksquare 10709790537
+chefhat 10709790757
+cherry 10709790875
+chevrondown 10709790948
+chevronfirst 10709791015
+chevronlast 10709791130
+chevronleft 10709791281
+chevronright 10709791437
+chevronup 10709791523
+chevronsdown 10709796864
+chevronsdownup 10709791632
+chevronsleft 10709797151
+chevronsleftright 10709797006
+chevronsright 10709797382
+chevronsrightleft 10709797274
+chevronsup 10709797622
+chevronsupdown 10709797508
+chrome 10709797725
+circle 10709798174
+circledot 10709797837
+circleellipsis 10709797985
+circleslashed 10709798100
+citrus 10709798276
+clapperboard 10709798350
+clipboard 10709799288
+clipboardcheck 10709798443
+clipboardcopy 10709798574
+clipboardedit 10709798682
+clipboardlist 10709798792
+clipboardsignature 10709798890
+clipboardtype 10709798999
+clipboardx 10709799124
+clock 10709805144
+clock1 10709799535
+clock10 10709799718
+clock11 10709799818
+clock12 10709799962
+clock2 10709803876
+clock3 10709803989
+clock4 10709804164
+clock5 10709804291
+clock6 10709804435
+clock7 10709804599
+clock8 10709804784
+clock9 10709804996
+cloud 10709806740
+cloudcog 10709805262
+clouddrizzle 10709805371
+cloudfog 10709805477
+cloudhail 10709805596
+cloudlightning 10709805727
+cloudmoon 10709805942
+cloudmoonrain 10709805838
+cloudoff 10709806060
+cloudrain 10709806277
+cloudrainwind 10709806166
+cloudsnow 10709806374
+cloudsun 10709806631
+cloudsunrain 10709806475
+cloudy 10709806859
+clover 10709806995
+code 10709810463
+code2 10709807111
+codepen 10709810534
+codesandbox 10709810676
+coffee 10709810814
+cog 10709810948
+coins 10709811110
+columns 10709811261
+command 10709811365
+compass 10709811445
+component 10709811595
+conciergebell 10709811706
+connection 10747361219
+contact 10709811834
+contrast 10709811939
+cookie 10709812067
+copy 10709812159
+copyleft 10709812251
+copyright 10709812311
+cornerdownleft 10709812396
+cornerdownright 10709812485
+cornerleftdown 10709812632
+cornerleftup 10709812784
+cornerrightdown 10709812939
+cornerrightup 10709813094
+cornerupleft 10709813185
+cornerupright 10709813281
+cpu 10709813383
+croissant 10709818125
+crop 10709818245
+cross 10709818399
+crosshair 10709818534
+crown 10709818626
+cupsoda 10709818763
+curlybraces 10709818847
+currency 10709818931
+database 10709818996
+delete 10709819059
+diamond 10709819149
+dice1 10709819266
+dice2 10709819361
+dice3 10709819508
+dice4 10709819670
+dice5 10709819801
+dice6 10709819896
+dices 10723343321
+diff 10723343416
+disc 10723343537
+divide 10723343805
+dividecircle 10723343636
+dividesquare 10723343737
+dollarsign 10723343958
+download 10723344270
+downloadcloud 10723344088
+droplet 10723344432
+droplets 10734883356
+drumstick 10723344737
+dumbbell 80277236776212
+edit 10734883598
+edit2 10723344885
+edit3 10723345088
+egg 10723345518
+eggfried 10723345347
+electricity 10723345749
+electricityoff 10723345643
+equal 10723345990
+equalnot 10723345866
+eraser 10723346158
+euro 10723346372
+expand 10723346553
+externallink 10723346684
+eye 10723346959
+eyeoff 10723346871
+factory 10723347051
+fan 10723354359
+fastforward 10723354521
+feather 10723354671
+figma 10723354801
+file 10723374641
+filearchive 10723354921
+fileaudio 10723355148
+fileaudio2 10723355026
+fileaxis3d 10723355272
+filebadge 10723355622
+filebadge2 10723355451
+filebarchart 10723355887
+filebarchart2 10723355746
+filebox 10723355989
+filecheck 10723356210
+filecheck2 10723356100
+fileclock 10723356329
+filecode 10723356507
+filecog 10723356830
+filecog2 10723356676
+filediff 10723357039
+filedigit 10723357151
+filedown 10723357322
+fileedit 10723357495
+fileheart 10723357637
+fileimage 10723357790
+fileinput 10723357933
+filejson 10723364435
+filejson2 10723364361
+filekey 10723364605
+filekey2 10723364515
+filelinechart 10723364725
+filelock 10723364957
+filelock2 10723364861
+fileminus 10723365254
+fileminus2 10723365086
+fileoutput 10723365457
+filepiechart 10723365598
+fileplus 10723365877
+fileplus2 10723365766
+filequestion 10723365987
+filescan 10723366167
+filesearch 10723366550
+filesearch2 10723366340
+filesignature 10723366741
+filespreadsheet 10723366962
+filesymlink 10723367098
+fileterminal 10723367244
+filetext 10723367380
+filetype 10723367606
+filetype2 10723367509
+fileup 10723367734
+filevideo 10723373884
+filevideo2 10723367834
+filevolume 10723374172
+filevolume2 10723374030
+filewarning 10723374276
+filex 10723374544
+filex2 10723374378
+files 10723374759
+film 10723374981
+filter 10723375128
+fingerprint 10723375250
+flag 10723375890
+flagoff 10723375443
+flagtriangleleft 10723375608
+flagtriangleright 10723375727
+flame 10723376114
+flashlight 10723376471
+flashlightoff 10723376365
+flaskconical 10734883986
+flaskround 10723376614
+fliphorizontal 10723376884
+fliphorizontal2 10723376745
+flipvertical 10723377138
+flipvertical2 10723377026
+flower 10747830374
+flower2 10723377305
+focus 10723377537
+folder 10723387563
+folderarchive 10723384478
+foldercheck 10723384605
+folderclock 10723384731
+folderclosed 10723384893
+foldercog 10723385213
+foldercog2 10723385036
+folderdown 10723385338
+folderedit 10723385445
+folderheart 10723385545
+folderinput 10723385721
+folderkey 10723385848
+folderlock 10723386005
+folderminus 10723386127
+folderopen 10723386277
+folderoutput 10723386386
+folderplus 10723386531
+foldersearch 10723386787
+foldersearch2 10723386674
+foldersymlink 10723386930
+foldertree 10723387085
+folderup 10723387265
+folderx 10723387448
+folders 10723387721
+forminput 10723387841
+forward 10723388016
+frame 10723394389
+framer 10723394565
+frown 10723394681
+fuel 10723394846
+functionsquare 10723395041
+gamepad 10723395457
+gamepad2 10723395215
+gauge 10723395708
+gavel 10723395896
+gem 10723396000
+ghost 10723396107
+gift 10723396402
+giftcard 10723396225
+gitbranch 10723396676
+gitbranchplus 10723396542
+gitcommit 10723396812
+gitcompare 10723396954
+gitfork 10723397049
+gitmerge 10723397165
+gitpullrequest 10723397431
+gitpullrequestclosed 10723397268
+gitpullrequestdraft 10734884302
+glass 10723397788
+glass2 10723397529
+glasswater 10723397678
+glasses 10723397895
+globe 10723404337
+globe2 10723398002
+grab 10723404472
+graduationcap 10723404691
+grape 10723404822
+grid 10723404936
+griphorizontal 10723405089
+gripvertical 10723405236
+hammer 10723405360
+hand 10723405649
+handmetal 10723405508
+harddrive 10723405749
+hardhat 10723405859
+hash 10723405975
+haze 10723406078
+headphones 10723406165
+heart 10723406885
+heartcrack 10723406299
+hearthandshake 10723406480
+heartoff 10723406662
+heartpulse 10723406795
+helpcircle 10723406988
+hexagon 10723407092
+highlighter 10723407192
+history 10723407335
+home 10723407389
+hourglass 10723407498
+icecream 10723414308
+image 10723415040
+imageminus 10723414487
+imageoff 10723414677
+imageplus 10723414827
+import 10723415205
+inbox 10723415335
+indent 10723415494
+indianrupee 10723415642
+infinity 10723415766
+info 10723415903
+inspect 10723416057
+italic 10723416195
+japaneseyen 10723416363
+joystick 10723416527
+key 10723416652
+keyboard 10723416765
+lamp 10723417513
+lampceiling 10723416922
+lampdesk 10723417016
+lampfloor 10723417131
+lampwalldown 10723417240
+lampwallup 10723417356
+landmark 10723417608
+languages 10723417703
+laptop 10723423881
+laptop2 10723417797
+lasso 10723424235
+lassoselect 10723424058
+laugh 10723424372
+layers 10723424505
+layout 10723425376
+layoutdashboard 10723424646
+layoutgrid 10723424838
+layoutlist 10723424963
+layouttemplate 10723425187
+leaf 10723425539
+library 10723425615
+lifebuoy 10723425685
+lightbulb 10723425852
+lightbulboff 10723425762
+linechart 10723426393
+link 10723426722
+link2 10723426595
+link2off 10723426513
+list 10723433811
+listchecks 10734884548
+listend 10723426886
+listminus 10723426986
+listmusic 10723427081
+listordered 10723427199
+listplus 10723427334
+liststart 10723427494
+listvideo 10723427619
+listx 10723433655
+loader 10723434070
+loader2 10723433935
+locate 10723434557
+locatefixed 10723434236
+locateoff 10723434379
+lock 10723434711
+login 10723434830
+logout 10723434906
+luggage 10723434993
+magnet 10723435069
+mail 10734885430
+mailcheck 10723435182
+mailminus 10723435261
+mailopen 10723435342
+mailplus 10723435443
+mailquestion 10723435515
+mailsearch 10734884739
+mailwarning 10734885015
+mailx 10734885247
+mails 10734885614
+map 10734886202
+mappin 10734886004
+mappinoff 10734885803
+maximize 10734886735
+maximize2 10734886496
+medal 10734887072
+megaphone 10734887454
+megaphoneoff 10734887311
+meh 10734887603
+menu 10734887784
+messagecircle 10734888000
+messagesquare 10734888228
+mic 10734888864
+mic2 10734888430
+micoff 10734888646
+microscope 10734889106
+microwave 10734895076
+milestone 10734895310
+minimize 10734895698
+minimize2 10734895530
+minus 10734896206
+minuscircle 10734895856
+minussquare 10734896029
+monitor 10734896881
+monitoroff 10734896360
+monitorspeaker 10734896512
+moon 10734897102
+morehorizontal 10734897250
+morevertical 10734897387
+mountain 10734897956
+mountainsnow 10734897665
+mouse 10734898592
+mousepointer 10734898476
+mousepointer2 10734898194
+mousepointerclick 10734898355
+move 10734900011
+move3d 10734898756
+movediagonal 10734899164
+movediagonal2 10734898934
+movehorizontal 10734899414
+movevertical 10734899821
+music 10734905958
+music2 10734900215
+music3 10734905665
+music4 10734905823
+navigation 10734906744
+navigation2 10734906332
+navigation2off 10734906144
+navigationoff 10734906580
+network 10734906975
+newspaper 10734907168
+octagon 10734907361
+option 10734907649
+outdent 10734907933
+package 10734909540
+package2 10734908151
+packagecheck 10734908384
+packageminus 10734908626
+packageopen 10734908793
+packageplus 10734909016
+packagesearch 10734909196
+packagex 10734909375
+paintbucket 10734909847
+paintbrush 10734910187
+paintbrush2 10734910030
+palette 10734910430
+palmtree 10734910680
+paperclip 10734910927
+partypopper 10734918735
+pause 10734919336
+pausecircle 10735024209
+pauseoctagon 10734919143
+pentool 10734919503
+pencil 10734919691
+percent 10734919919
+personstanding 10734920149
+phone 10734921524
+phonecall 10734920305
+phoneforwarded 10734920508
+phoneincoming 10734920694
+phonemissed 10734920845
+phoneoff 10734921077
+phoneoutgoing 10734921288
+piechart 10734921727
+piggybank 10734921935
+pin 10734922324
+pinoff 10734922180
+pipette 10734922497
+pizza 10734922774
+plane 10734922971
+play 10734923549
+playcircle 10734923214
+plus 10734924532
+pluscircle 10734923868
+plussquare 10734924219
+podcast 10734929553
+pointer 10734929723
+poundsterling 10734929981
+power 10734930466
+poweroff 10734930257
+printer 10734930632
+puzzle 10734930886
+quote 10734931234
+radio 10734931596
+radioreceiver 10734931402
+rectanglehorizontal 10734931777
+rectanglevertical 10734932081
+recycle 10734932295
+redo 10734932822
+redo2 10734932586
+refreshccw 10734933056
+refreshcw 10734933222
+refrigerator 10734933465
+regex 10734933655
+repeat 10734933966
+repeat1 10734933826
+reply 10734934252
+replyall 10734934132
+rewind 10734934347
+rocket 10734934585
+rockingchair 10734939942
+rotate3d 10734940107
+rotateccw 10734940376
+rotatecw 10734940654
+rss 10734940825
+ruler 10734941018
+russianruble 10734941199
+sailboat 10734941354
+save 10734941499
+scale 10734941912
+scale3d 10734941739
+scaling 10734942072
+scan 10734942565
+scanface 10734942198
+scanline 10734942351
+scissors 10734942778
+screenshare 10734943193
+screenshareoff 10734942967
+scroll 10734943448
+search 10734943674
+send 10734943902
+separatorhorizontal 10734944115
+separatorvertical 10734944326
+server 10734949856
+servercog 10734944444
+servercrash 10734944554
+serveroff 10734944668
+settings 10734950309
+settings2 10734950020
+share 10734950813
+share2 10734950553
+sheet 10734951038
+shield 10734951847
+shieldalert 10734951173
+shieldcheck 10734951367
+shieldclose 10734951535
+shieldoff 10734951684
+shirt 10734952036
+shoppingbag 10734952273
+shoppingcart 10734952479
+shovel 10734952773
+showerhead 10734952942
+shrink 10734953073
+shrub 10734953241
+shuffle 10734953451
+sidebar 10734954301
+sidebarclose 10734953715
+sidebaropen 10734954000
+sigma 10734954538
+signal 10734961133
+signalhigh 10734954807
+signallow 10734955080
+signalmedium 10734955336
+signalzero 10734960878
+siren 10734961284
+skipback 10734961526
+skipforward 10734961809
+skull 10734962068
+slack 10734962339
+slash 10734962600
+slice 10734963024
+sliders 10734963400
+slidershorizontal 10734963191
+smartphone 10734963940
+smartphonecharging 10734963671
+smile 10734964441
+smileplus 10734964188
+snowflake 10734964600
+sofa 10734964852
+sortasc 10734965115
+sortdesc 10734965287
+speaker 10734965419
+sprout 10734965572
+square 10734965702
+star 10734966248
+starhalf 10734965897
+staroff 10734966097
+stethoscope 10734966384
+sticker 10734972234
+stickynote 10734972463
+stopcircle 10734972621
+stretchhorizontal 10734972862
+stretchvertical 10734973130
+strikethrough 10734973290
+subscript 10734973457
+sun 10734974297
+sundim 10734973645
+sunmedium 10734973778
+sunmoon 10734973999
+sunsnow 10734974130
+sunrise 10734974522
+sunset 10734974689
+superscript 10734974850
+swissfranc 10734975024
+switchcamera 10734975214
+sword 10734975486
+swords 10734975692
+syringe 10734975932
+table 10734976230
+table2 10734976097
+tablet 10734976394
+tag 10734976528
+tags 10734976739
+target 10734977012
+tent 10734981750
+terminal 10734982144
+terminalsquare 10734981995
+textcursor 10734982395
+textcursorinput 10734982297
+thermometer 10734983134
+thermometersnowflake 10734982571
+thermometersun 10734982771
+thumbsdown 10734983359
+thumbsup 10734983629
+ticket 10734983868
+timer 10734984606
+timeroff 10734984138
+timerreset 10734984355
+toggleleft 10734984834
+toggleright 10734985040
+tornado 10734985247
+toybrick 10747361919
+train 10747362105
+trash 10747362393
+trash2 10747362241
+treedeciduous 10747362534
+treepine 10747362748
+trees 10747363016
+trendingdown 10747363205
+trendingup 10747363465
+triangle 10747363621
+trophy 10747363809
+truck 10747364031
+tv 10747364593
+tv2 10747364302
+type 10747364761
+umbrella 10747364971
+underline 10747365191
+undo 10747365484
+undo2 10747365359
+unlink 10747365771
+unlink2 10747397871
+unlock 10747366027
+upload 10747366434
+uploadcloud 10747366266
+usb 10747366606
+user 10747373176
+usercheck 10747371901
+usercog 10747372167
+userminus 10747372346
+userplus 10747372702
+userx 10747372992
+users 10747373426
+utensils 10747373821
+utensilscrossed 10747373629
+venetianmask 10747374003
+verified 10747374131
+vibrate 10747374489
+vibrateoff 10747374269
+video 10747374938
+videooff 10747374721
+view 10747375132
+voicemail 10747375281
+volume 10747376008
+volume1 10747375450
+volume2 10747375679
+volumex 10747375880
+wallet 10747376205
+wand 10747376565
+wand2 10747376349
+watch 10747376722
+waves 10747376931
+webcam 10747381992
+wifi 10747382504
+wifioff 10747382268
+wind 10747382750
+wraptext 10747383065
+wrench 10747383470
+x 10747384394
+xcircle 10747383819
+xoctagon 10747384037
+xsquare 10747384217
+zoomin 10747384552
+zoomout 10747384679
+]]):gmatch("(%S+) (%d+)") do Icons[n] = "rbxassetid://" .. i end
+
+local veltrolib = {
+	Themes = Themes,
+	Info = {Version = "8.1.0"},
+	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
+	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
+}
+
+local BaseScale = workspace.CurrentCamera.ViewportSize.Y / veltrolib.Save.Scale
+local ViewportSize = workspace.CurrentCamera.ViewportSize
+local UIScale = BaseScale
+local Settings, Flags, Themed = veltrolib.Settings, veltrolib.Flags, veltrolib.Instances
+
+local function Trim(s) return (tostring(s or ""):match("^%s*(.-)%s*$")) end
+local function GetStr(v) return type(v) == "function" and v() or v end
+local function NeedsRichText(t) return type(t) == "string" and t:find("<", 1, true) ~= nil and t:find(">", 1, true) ~= nil end
+local function Bright(c, a)
+	a = a or 55
+	return C3(math.clamp(c.R * 255 + a, 0, 255), math.clamp(c.G * 255 + a, 0, 255), math.clamp(c.B * 255 + a, 0, 255))
+end
+
+local function SetProps(i, p) if p then for k, v in p do i[k] = v end end return i end
+local function SetChildren(i, c) if c then for _, ch in c do ch.Parent = i end end return i end
+local function Create(class, a, b, c)
+	local o = Instance.new(class)
+	if typeof(a) == "Instance" then
+		o.Parent = a
+		SetProps(o, b); SetChildren(o, c)
+	else
+		SetProps(o, a); SetChildren(o, b)
+	end
+	return o
+end
+local function InsertTheme(i, t)
+	Themed[i] = t
+	i.Destroying:Once(function() Themed[i] = nil end)
+	return i
+end
+
+local SaveRoot = "Veltro-Lib"
+local SaveFolder = SaveRoot .. "/Ui-Settings"
+local SaveFile = SaveFolder .. "/Veltro-Lib-Ui.json"
+local ImgCache = SaveFolder .. "/images"
+local CanFS = makefolder and writefile and isfolder and true or false
+
+local function EnsureFolders()
+	if not CanFS then return end
+	for _, f in {SaveRoot, SaveFolder, ImgCache} do
+		if not isfolder(f) then makefolder(f) end
+	end
+end
+local function SaveJson(save)
+	if not CanFS then return end
+	EnsureFolders()
+	writefile(SaveFile, HttpService:JSONEncode(save))
+end
+
+local ImageAssetCache = {}
+function veltrolib.FetchHttpImage(url)
+	if ImageAssetCache[url] then return ImageAssetCache[url] end
+	if not CanFS then return url end
+	EnsureFolders()
+	local path = ImgCache .. "/" .. url:gsub("[^%w%-_]", "_"):sub(1, 60) .. "." .. (url:match("%.(%w+)%??[^%.]*$") or "png")
+	if not isfile(path) then
+		local ok, body = pcall(game.HttpGet, game, url)
+		if not ok or not body then return url end
+		pcall(writefile, path, body)
+	end
+	if isfile(path) then
+		local ok, asset = pcall(getcustomasset, path)
+		if ok then ImageAssetCache[url] = asset return asset end
+	end
+	return url
+end
+
+do
+	local ok, d = pcall(function() return isfile and isfile(SaveFile) and HttpService:JSONDecode(readfile(SaveFile)) end)
+	if ok and type(d) == "table" then
+		for _, k in {"UISize", "TabHeight", "Transparency", "MinimizeButtons", "MainImage"} do
+			if d[k] ~= nil then veltrolib.Save[k] = d[k] end
+		end
+		if Themes[d.Theme] then veltrolib.Save.Theme = d.Theme end
+		if d.LoadMethod == "Fast" or d.LoadMethod == "Smooth" then veltrolib.Save.LoadMethod = d.LoadMethod end
+	end
+	EnsureFolders()
+end
+
+local Funcs = {}
+function Funcs.InsertCallback(tab, f) if type(f) == "function" then tab[#tab + 1] = f end return f end
+function Funcs.SetCallback(tab, f) if type(f) == "function" then table.clear(tab) tab[1] = f end end
+function Funcs.FireCallback(tab, ...) for _, v in tab do if type(v) == "function" then task.spawn(v, ...) end end end
+function Funcs.ToggleVisible(o, b) if b == nil then b = not o.Visible end o.Visible = b end
+function Funcs.ToggleParent(o, b, p)
+	if b == nil then b = not o.Parent end
+	o.Parent = b and p or nil
+end
+function Funcs.GetCallback(Cfg, idx)
+	local f = Cfg[idx] or Cfg.Callback or function() end
+	if type(f) == "table" then return {function(v) f[1][f[2]] = v end} end
+	return {f}
+end
+
+local Connection, Connections = veltrolib.Connection, {}
+for _, n in {"FlagsChanged", "ThemeChanged", "FileSaved", "ThemeChanging", "OptionAdded"} do
+	local list, c = {}, {Name = n}
+	Connection[n], Connections[n] = c, list
+	local function wrap(f)
+		local o = {Function = f, Connected = true}
+		function o:Disconnect()
+			if self.Connected then
+				local i = table.find(list, self.Function)
+				if i then table.remove(list, i) end
+				self.Connected = false
+			end
+		end
+		function o:Fire(...) if self.Connected then task.spawn(self.Function, ...) end end
+		return o
+	end
+	function c:Connect(f) if type(f) == "function" then list[#list + 1] = f return wrap(f) end end
+	function c:Once(f)
+		if type(f) ~= "function" then return end
+		local o
+		local g = function(...) task.spawn(f, ...) o:Disconnect() end
+		list[#list + 1] = g
+		o = wrap(g)
+		return o
+	end
+end
+function Connection:FireConnection(n, ...)
+	for _, f in table.clone(Connections[type(n) == "string" and n or n.Name]) do task.spawn(f, ...) end
+end
+
+local function CheckFlag(n) return type(n) == "string" and Flags[n] ~= nil end
+local function GetFlag(n) return type(n) == "string" and Flags[n] end
+local function SetFlag(f, v)
+	if f and (v ~= Flags[f] or type(v) == "table") then
+		Flags[f] = v
+		Connection:FireConnection("FlagsChanged", f, v)
+	end
+end
+do
+	local db
+	Connection.FlagsChanged:Connect(function()
+		local file = Settings.ScriptFile
+		if db or not file or not writefile then return end
+		db = true; task.wait(0.1); db = false
+		local ok, enc = pcall(HttpService.JSONEncode, HttpService, Flags)
+		if ok and pcall(writefile, file, enc) then
+			Connection:FireConnection("FileSaved", "Script-Flags", file, enc)
+		end
+	end)
+end
+
+local Theme = Themes[veltrolib.Save.Theme]
+local CurrentTransparency = veltrolib.Save.Transparency or 0.03
+local _MainFrame
+
+local OldGui = CoreGui:FindFirstChild("smooth library")
+if OldGui then OldGui:Destroy() end
+local ScreenGui = Create("ScreenGui", CoreGui, {Name = "smooth library", ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, {
+	Create("UIScale", {Scale = UIScale, Name = "Scale"})
+})
+
+local TweenCache = {}
+local function CreateTween(Cfg)
+	local inst, prop, val = Cfg[1] or Cfg.Instance, Cfg[2] or Cfg.Prop, Cfg[3] or Cfg.NewVal
+	local time = Cfg[4] or Cfg.Time or 0.5
+	local info = TweenCache[time]
+	if not info then info = TweenInfo.new(time, Enum.EasingStyle.Quint) TweenCache[time] = info end
+	local tw = TweenService:Create(inst, info, {[prop] = val})
+	tw:Play()
+	if Cfg[5] or Cfg.wait then tw.Completed:Wait() end
+	return tw
+end
+
+local function IsPress(i) return i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch end
+local function Held() return UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) end
+
+local function MakeDrag(Instance)
+	Instance.Active, Instance.AutoButtonColor = true, false
+	local DragStart, StartPos, InputOn
+	Instance.MouseButton1Down:Connect(function() InputOn = true end)
+	Instance.InputBegan:Connect(function(Input)
+		if not IsPress(Input) then return end
+		StartPos, DragStart = Instance.Position, Input.Position
+		while Held() do
+			RunService.Heartbeat:Wait()
+			if InputOn then
+				local d = Input.Position - DragStart
+				CreateTween({Instance, "Position", UD2(StartPos.X.Scale, StartPos.X.Offset + d.X / UIScale, StartPos.Y.Scale, StartPos.Y.Offset + d.Y / UIScale), 0.35})
+			end
+		end
+		InputOn = false
+	end)
+	return Instance
+end
+
+local E = veltrolib.Elements
+local function Make(n, ...) return E[n](...) end
+E.Corner = function(p, r) return Create("UICorner", p, {CornerRadius = r or UD(0, 7)}) end
+E.Stroke = function(p, props, color, th)
+	return InsertTheme(SetProps(Create("UIStroke", p, {Color = color or Theme["Color Stroke"], Thickness = th or 1, Transparency = Theme["Stroke Transparency"] or 0, ApplyStrokeMode = "Border"}), props), "Stroke")
+end
+E.ElementStroke = function(p, props, color, th)
+	return InsertTheme(SetProps(Create("UIStroke", p, {Color = color or Bright(Theme["Color Stroke"]), Thickness = th or 1, Transparency = Theme["Stroke Transparency"] or 0, ApplyStrokeMode = "Border"}), props), "ElementStroke")
+end
+E.Button = function(p, props)
+	return InsertTheme(SetProps(Create("TextButton", p, {
+		Text = "", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Theme["Color Hub 2"],
+		BackgroundTransparency = Theme["Panel Transparency"] or math.clamp(CurrentTransparency + 0.55, 0, 0.95), AutoButtonColor = false
+	}), props), "Frame")
+end
+E.Gradient = function(p, props) return InsertTheme(SetProps(Create("UIGradient", p, {Color = Theme["Color Hub 1"]}), props), "Gradient") end
+
+local ColorProp = {
+	Frame = "BackgroundColor3", ImageButton = "BackgroundColor3", TextButton = "BackgroundColor3",
+	ImageLabel = "ImageColor3", TextLabel = "TextColor3", TextBox = "TextColor3",
+	ScrollingFrame = "ScrollBarImageColor3", UIStroke = "Color"
+}
+local function Col(i, v) local p = ColorProp[i.ClassName] if p then i[p] = v end end
+local function PanelT(add) return Theme["Panel Transparency"] or math.clamp(CurrentTransparency + add, 0, 0.95) end
+local function StrokeT(i) if i.ClassName == "UIStroke" then i.Transparency = Theme["Stroke Transparency"] or 0 end end
+
+local ThemeApply = {
+	Gradient = function(i) i.Color = Theme["Color Hub 1"] end,
+	Frame = function(i) i.BackgroundColor3 = Theme["Color Hub 2"] i.BackgroundTransparency = PanelT(0.55) end,
+	SectionFrame = function(i) i.BackgroundColor3 = Theme["Color Hub 2"] i.BackgroundTransparency = PanelT(0.35) end,
+	Main = function(i) i.BackgroundColor3 = Theme["Color Hub 2"] end,
+	Stroke = function(i) Col(i, Theme["Color Stroke"]) StrokeT(i) end,
+	ElementStroke = function(i) Col(i, Bright(Theme["Color Stroke"])) StrokeT(i) end,
+	Theme = function(i) Col(i, Theme["Color Theme"]) end,
+	ThemeText = function(i) Col(i, Bright(Theme["Color Theme"], 60)) end,
+	Text = function(i) Col(i, Theme["Color Text"]) end,
+	DarkText = function(i) Col(i, Theme["Color Dark Text"]) end,
+	TabBG = function(i) i.BackgroundColor3 = Theme["Color Theme"] end,
+	ScrollBar = function(i) Col(i, Theme["Color Theme"]) end,
+	DropdownOpt = function(i)
+		local on = i:GetAttribute("Selected") == true
+		i.BackgroundColor3 = on and Theme["Color Theme"] or Theme["Color Hub 2"]
+		i.BackgroundTransparency = on and 0.85 or PanelT(0.55)
+	end
+}
+
+local function ButtonFrame(Parent, Title, Description, HolderSize)
+	local hasDesc = type(Description) == "string" and Description:gsub(" ", ""):len() > 0
+	local H = 25
+	local Frame = InsertTheme(Create("TextButton", Parent, {
+		Size = UD2(1, 0, 0, hasDesc and 38 or H), Text = "", AutoButtonColor = false,
+		BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"
+	}), "Theme")
+	Make("Corner", Frame, UD(0, 3))
+
+	local TitleL = InsertTheme(Create("TextLabel", Frame, {
+		Font = Font.GothamMedium, TextColor3 = Theme["Color Text"], Size = HolderSize, Position = UD2(0, 10, 0, 7),
+		BackgroundTransparency = 1, TextTruncate = "AtEnd", TextSize = 10, TextXAlignment = "Left", TextYAlignment = "Center", Text = ""
+	}), "Text")
+	local DescL = InsertTheme(Create("TextLabel", Frame, {
+		Font = Font.Gotham, TextColor3 = Theme["Color Text"], Size = UD2(1, -20, 0, 0), Position = UD2(0, 10, 0, 21),
+		BackgroundTransparency = 1, TextWrapped = true, TextSize = 9, LineHeight = 1.25, TextXAlignment = "Left", TextYAlignment = "Top", Text = "", Visible = false
+	}), "Text")
+
+	local function Center(on)
+		TitleL.Position = on and UD2(0, 10, 0.5, 0) or UD2(0, 10, 0, 9)
+		TitleL.AnchorPoint = on and Vector2.new(0, 0.5) or Vector2.zero
+	end
+	if not hasDesc then Center(true) end
+
+	local Label, resizeConn = {}
+	function Label:SetTitle(v)
+		if type(v) == "string" and v:gsub(" ", ""):len() > 0 then
+			TitleL.RichText = NeedsRichText(v)
+			TitleL.Text = v
+		end
+	end
+	local function Fit()
+		local plain = DescL.Text:gsub("<[^<>]->", "")
+		if plain == "" then plain = " " end
+		local w = (Frame.AbsoluteSize.X - 20) / UIScale
+		if w <= 0 then w = 200 end
+		local h = TextService:GetTextSize(plain, DescL.TextSize, DescL.Font, Vector2.new(w, math.huge)).Y * DescL.LineHeight
+		DescL.Size = UD2(1, -20, 0, h)
+		Frame.Size = UD2(1, 0, 0, 29 + h)
+	end
+	function Label:SetDesc(v)
+		if resizeConn then resizeConn:Disconnect() resizeConn = nil end
+		if type(v) == "string" and v:gsub(" ", ""):len() > 0 then
+			DescL.Visible, DescL.RichText, DescL.Text = true, NeedsRichText(v), v
+			Center(false)
+			Fit()
+			resizeConn = Frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(Fit)
+		else
+			DescL.Visible, DescL.Text = false, ""
+			Center(true)
+			Frame.Size = UD2(1, 0, 0, H)
+		end
+	end
+	Label:SetTitle(Title)
+	Label:SetDesc(Description)
+	return Frame, Label
+end
+
+function veltrolib:GetIcon(index)
+	if type(index) ~= "string" or #index == 0 then return index end
+	if index:find("^https?://") then return self.FetchHttpImage(index) end
+	if index:find("rbxassetid://", 1, true) then return index end
+	index = index:lower():gsub("lucide", ""):gsub("-", "")
+	if Icons[index] then return Icons[index] end
+	for Name, Icon in Icons do
+		if Name:find(index, 1, true) then return Icon end
+	end
+	return index
+end
+
+function veltrolib:SetTheme(NewTheme)
+	if not Themes[NewTheme] then return end
+	veltrolib.Save.Theme = NewTheme
+	SaveJson(veltrolib.Save)
+	Theme = Themes[NewTheme]
+	Connection:FireConnection("ThemeChanged", NewTheme)
+	for inst, typ in Themed do
+		local f = ThemeApply[typ]
+		if f then f(inst) end
+	end
+end
+
+function veltrolib:SetTransparency(v)
+	v = math.clamp(tonumber(v) or 0, 0, 0.95)
+	CurrentTransparency = v
+	veltrolib.Save.Transparency = v
+	SaveJson(veltrolib.Save)
+	if _MainFrame then _MainFrame.Transparency = v end
+end
+
+function veltrolib:SetScale(s)
+	UIScale = ViewportSize.Y / math.clamp(s, 300, 2000)
+	ScreenGui.Scale.Scale = UIScale
+end
+
+function veltrolib:SetBackgroundImage(raw)
+	local id = Trim(raw)
+	if id ~= "" then id = veltrolib:GetIcon(id) end
+	if _MainFrame then _MainFrame.Image = id end
+	veltrolib.Save.MainImage = id
+	SaveJson(veltrolib.Save)
+end
+
+function veltrolib:SetLoadMethod(m)
+	if m ~= "Fast" and m ~= "Smooth" then return end
+	veltrolib.Save.LoadMethod = m
+	SaveJson(veltrolib.Save)
+end
+
+local function Defer(queue, build)
+	local real, pending = nil, {}
+	queue[#queue + 1] = function()
+		real = build()
+		for _, p in pending do real[p[1]](real, table.unpack(p, 2, p.n)) end
+		pending = nil
+	end
+	return setmetatable({}, {__index = function(_, k)
+		return function(_, ...)
+			if real then return real[k](real, ...) end
+			local args = table.pack(...)
+			if type(k) == "string" and k:sub(1, 3) == "Add" then
+				return Defer(queue, function() return real[k](real, table.unpack(args, 1, args.n)) end)
+			end
+			pending[#pending + 1] = table.pack(k, ...)
+		end
+	end})
+end
+
+local TabQueues, QueueWorker = {}, nil
+local function PumpQueues()
+	if QueueWorker then return end
+	QueueWorker = task.spawn(function()
+		task.wait()
+		while true do
+			local job
+			for _, q in TabQueues do
+				if q[1] then job = table.remove(q, 1) break end
+			end
+			if not job then break end
+			job()
+			task.wait()
+		end
+		QueueWorker = nil
+	end)
+end
+
+local DialogIcons = {
+	info = "rbxassetid://10723415903", warning = "rbxassetid://10709753149", error = "rbxassetid://10709752996",
+	success = "rbxassetid://10709790387", theme = "rbxassetid://10734950309", image = "rbxassetid://10723415040"
+}
+local DialogSizes = {theme = {310, 220}, image = {290, 200}, default = {270, 160}}
+
+function veltrolib:MakeWindow(Configs)
+	local WTitle = Configs[1] or Configs.Name or Configs.Title or "smooth library"
+	local WMiniText = Configs[2] or Configs.SubTitle or "modified - ChDrago"
+	local SaveName = Configs[3] or Configs.SaveFolder or false
+
+	Settings.ScriptFile = false
+	if SaveName and CanFS then
+		local dir = SaveRoot .. "/" .. tostring(SaveName)
+		if not isfolder(SaveRoot) then makefolder(SaveRoot) end
+		if not isfolder(dir) then makefolder(dir) end
+		Settings.ScriptFile = dir .. "/" .. Player.Name .. ".json"
+	end
+	do
+		local f = Settings.ScriptFile
+		if f and readfile and isfile and isfile(f) then
+			local ok, d = pcall(function() return HttpService:JSONDecode(readfile(f)) end)
+			if ok and type(d) == "table" then for k, v in d do Flags[k] = v end end
+		end
+	end
+
+	local Smooth = (Configs.LoadMethod or veltrolib.Save.LoadMethod) == "Smooth"
+	local Minimized, SaveSize, WaitClick, MinimizeBtnCustomImage
+	local Window, FirstTab = {}, false
+
+	local UISizeX, UISizeY = unpack(veltrolib.Save.UISize)
+	local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
+		Size = UDim2.fromOffset(UISizeX, UISizeY), Position = UD2(0.5, -UISizeX / 2, 0.5, -UISizeY / 2),
+		Transparency = CurrentTransparency, ScaleType = Enum.ScaleType.Crop, Image = veltrolib.Save.MainImage or "", Name = "Hub"
+	}), "Main")
+	_MainFrame = MainFrame
+
+	local NotificationHolder = Create("Frame", ScreenGui, {
+		Size = UD2(0, 320, 1, -20), Position = UD2(1, -12, 1, -12), AnchorPoint = Vector2.one, BackgroundTransparency = 1, Name = "NotificationHolder"
+	}, {Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UD(0, 8), VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right})})
+	local NotificationCount = 0
+
+	Make("Gradient", MainFrame, {Rotation = 45})
+	MakeDrag(MainFrame)
+	local MainCorner = Make("Corner", MainFrame, UD(0, 7))
+	InsertTheme(Create("UIStroke", MainFrame, {Color = Bright(Theme["Color Stroke"]), Thickness = 1.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}), "ElementStroke")
+
+	local Components = Create("Folder", MainFrame, {Name = "Components"})
+	local DropdownHolder = Create("Folder", ScreenGui, {Name = "Dropdown"})
+	local TopBar = Create("Frame", Components, {Size = UD2(1, 0, 0, 28), BackgroundTransparency = 1, Name = "Top Bar"})
+
+	local function TW(t, s, f) return TextService:GetTextSize(t, s, f, Vector2.new(9999, 28)).X end
+	local w1, w2 = TW(WTitle, 12, Font.GothamBold), TW(WMiniText, 8, Font.Gotham)
+
+	local Title = InsertTheme(Create("TextLabel", TopBar, {
+		Position = UD2(0, 15, 0.5), AnchorPoint = Vector2.new(0, 0.5), AutomaticSize = "X", Size = UD2(0, 0, 0, 28), Text = WTitle,
+		TextXAlignment = "Left", TextYAlignment = "Center", TextSize = 12, TextColor3 = Bright(Theme["Color Theme"], 60),
+		BackgroundTransparency = 1, Font = Font.GothamBold, Name = "Title"
+	}), "ThemeText")
+	local SubTitle = InsertTheme(Create("TextLabel", TopBar, {
+		AutomaticSize = "X", Size = UD2(0, 0, 0, 28), AnchorPoint = Vector2.new(0, 0.5), Position = UD2(0, 23 + w1, 0.5), Text = WMiniText,
+		TextColor3 = Theme["Color Dark Text"], BackgroundTransparency = 1, TextXAlignment = "Left", TextYAlignment = "Center", TextSize = 8, Font = Font.Gotham, Name = "SubTitle"
+	}), "DarkText")
+	local TagHolder = Create("Frame", TopBar, {
+		AnchorPoint = Vector2.new(0, 0.5), Position = UD2(0, 33 + w1 + w2, 0.5), Size = UD2(0, 200, 0, 18), BackgroundTransparency = 1, Name = "TagHolder"
+	}, {Create("UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Left, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UD(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})})
+
+	local MainScroll = InsertTheme(Create("ScrollingFrame", Components, {
+		Size = UD2(0, veltrolib.Save.TabSize, 1, -28), ScrollBarImageColor3 = Theme["Color Theme"], Position = UD2(0, 0, 1, 0), AnchorPoint = Vector2.new(0, 1),
+		ScrollBarThickness = 1.5, BackgroundTransparency = 1, ScrollBarImageTransparency = 1, CanvasSize = UDim2.new(), AutomaticCanvasSize = "Y",
+		ScrollingDirection = "Y", BorderSizePixel = 0, Name = "Tab Scroll"
+	}, {
+		Create("UIPadding", {PaddingLeft = UD(0, 5), PaddingRight = UD(0, 6), PaddingTop = UD(0, 5), PaddingBottom = UD(0, 10)}),
+		Create("UIListLayout", {Padding = UD(0, 5)})
+	}), "ScrollBar")
+
+	local Containers = Create("Frame", Components, {
+		Size = UD2(1, -MainScroll.Size.X.Offset, 1, -28), AnchorPoint = Vector2.one, Position = UD2(1, 0, 1, 0),
+		BackgroundTransparency = 1, ClipsDescendants = true, Name = "Containers"
+	})
+
+	local PAGE_TITLE_RESERVED = 28
+	local PageTitleLabel = InsertTheme(Create("TextLabel", Containers, {
+		Size = UD2(1, -5, 0, 23), Position = UD2(0, 0, 0, 5), BackgroundTransparency = 1, Font = Font.GothamBold, Text = "",
+		TextColor3 = Theme["Color Text"], TextSize = 17, TextXAlignment = Enum.TextXAlignment.Left, Name = "PageTitle"
+	}), "Text")
+
+	local ControlSize1 = MakeDrag(Create("ImageButton", MainFrame, {
+		Size = UD2(0, 35, 0, 35), Position = MainFrame.Size, Active = true, AnchorPoint = Vector2.new(0.8, 0.8), BackgroundTransparency = 1, Name = "Control Hub Size"
+	}))
+	local ControlSize2 = MakeDrag(Create("ImageButton", MainFrame, {
+		Size = UD2(0, 20, 1, -30), Position = UD2(0, MainScroll.Size.X.Offset, 1, 0), AnchorPoint = Vector2.new(0.5, 1), Active = true, BackgroundTransparency = 1, Name = "Control Tab Size"
+	}))
+
+	local function ControlSize()
+		local P1, P2 = ControlSize1.Position, ControlSize2.Position
+		ControlSize1.Position = UDim2.fromOffset(math.clamp(P1.X.Offset, 430, 1000), math.clamp(P1.Y.Offset, 200, 500))
+		local W = math.clamp(P2.X.Offset, 45, 135) < 90 and 45 or 135
+		ControlSize2.Position = UD2(0, W, 1, 0)
+		MainScroll.Size = UD2(0, W, 1, -28)
+		Containers.Size = UD2(1, -W, 1, -28)
+		MainFrame.Size = ControlSize1.Position
+		for _, T in veltrolib.Tabs do
+			if T.LabelTitle then T.LabelTitle.Visible = W ~= 45 end
+		end
+	end
+	ControlSize1:GetPropertyChangedSignal("Position"):Connect(ControlSize)
+	ControlSize2:GetPropertyChangedSignal("Position"):Connect(ControlSize)
+
+	ControlSize1.InputBegan:Connect(function(Input)
+		if not IsPress(Input) then return end
+		while Held() do task.wait() end
+		if not Minimized then
+			veltrolib.Save.UISize = {MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset}
+			SaveJson(veltrolib.Save)
+		end
+	end)
+
+	local CloseButton = Create("ImageButton", {
+		Size = UD2(0, 14, 0, 14), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundTransparency = 1,
+		Image = "rbxassetid://10747384394", AutoButtonColor = false, Name = "Close"
+	})
+	local MinimizeButton = SetProps(CloseButton:Clone(), {Position = UD2(1, -35, 0.5), Image = "rbxassetid://10734896206", Name = "Minimize"})
+	SetChildren(Create("Folder", TopBar, {Name = "Buttons"}), {CloseButton, MinimizeButton})
+
+	function Window:CloseBtn()
+		Window:Dialog({Title = "Close", Text = "You Want Close Ui?", Options = {{"Confirm", function() ScreenGui:Destroy() end}, {"Cancel"}}})
+	end
+	function Window:MinimizeBtn()
+		if WaitClick then return end
+		WaitClick = true
+		local open = Minimized
+		MinimizeButton.Image = MinimizeBtnCustomImage or (open and "rbxassetid://10734896206" or "rbxassetid://10734924532")
+		if not open then SaveSize = MainFrame.Size end
+		ControlSize1.Visible, ControlSize2.Visible = open, open
+		CreateTween({MainFrame, "Size", open and SaveSize or UDim2.fromOffset(MainFrame.Size.X.Offset, 28), 0.25, true})
+		Minimized = not open
+		WaitClick = false
+	end
+	function Window:Minimize() MainFrame.Visible = not MainFrame.Visible end
+
+	function Window:NewMinimizer(Cfg)
+		local KeyCode = (type(Cfg) == "table" and (Cfg[1] or Cfg.KeyCode)) or Cfg
+		if typeof(KeyCode) ~= "EnumItem" then
+			error(("\"Window.NewMinimizer.KeyCode\". 'KeyCode' expected, got %s"):format(typeof(KeyCode)), 2)
+		end
+		local Minimizer = {KeyCode = KeyCode}
+		local Conn = UIS.InputBegan:Connect(function(Input, GP)
+			if not GP and Input.KeyCode == Minimizer.KeyCode then Window:MinimizeBtn() end
+		end)
+		function Minimizer:Destroy() Conn:Disconnect() end
+		return Minimizer
+	end
+
+	function Window:AddMinimizeButton(Cfg)
+		Cfg = Cfg or {}
+		local Id = Cfg.Flag or Cfg.Id or "default"
+		local Corner = (Cfg.Corner and Cfg.Corner.CornerRadius) or UD(0.2, 0)
+		local Pos = Cfg.Position or UDim2.fromScale(0.05, 0.5)
+		local Sz = Cfg.Size or 40
+		local Tr = Cfg.Transparency or 0
+		local Img = veltrolib:GetIcon(tostring(Cfg.Icon or Cfg.Image or "rbxassetid://10734895698"))
+
+		local Saves = veltrolib.Save.MinimizeButtons
+		if not Saves then Saves = {} veltrolib.Save.MinimizeButtons = Saves end
+		local Saved = Saves[Id] or {}
+		if Saved.posX and Saved.posY then Pos = UDim2.fromOffset(Saved.posX, Saved.posY) end
+
+		local Button = MakeDrag(Create("ImageButton", ScreenGui, {
+			Size = UDim2.fromOffset(Sz, Sz), Position = Pos, BackgroundColor3 = Theme["Color Hub 2"], BackgroundTransparency = Tr,
+			Image = Img, ScaleType = Enum.ScaleType.Stretch, AutoButtonColor = false, ZIndex = 10, Name = "MinimizeFloatBtn_" .. Id
+		}))
+		local CornerInst = Make("Corner", Button, Corner)
+		Make("Stroke", Button)
+		Button.MouseEnter:Connect(function() CreateTween({Button, "BackgroundTransparency", math.max(Tr - 0.15, 0), 0.18}) end)
+		Button.MouseLeave:Connect(function() CreateTween({Button, "BackgroundTransparency", Tr, 0.18}) end)
+		Button.Activated:Connect(Window.Minimize)
+
+		local db
+		Button:GetPropertyChangedSignal("Position"):Connect(function()
+			if db then return end
+			db = true
+			task.delay(0.3, function()
+				db = false
+				local p = Button.Position
+				local s = Saves[Id] or {}
+				Saves[Id] = s
+				s.posX, s.posY = p.X.Offset, p.Y.Offset
+				SaveJson(veltrolib.Save)
+			end)
+		end)
+
+		return {
+			Button = Button,
+			SetImage = function(_, img) img = tostring(img) Button.Image = img:match("^%d+$") and "rbxassetid://" .. img or img end,
+			SetSize = function(_, sz) sz = math.clamp(math.floor(sz + 0.5), 20, 120) Button.Size = UDim2.fromOffset(sz, sz) end,
+			SetTrans = function(_, tr) Button.BackgroundTransparency = math.clamp(tr, 0, 1) end,
+			SetCorner = function(_, u) CornerInst.CornerRadius = u end,
+			Destroy = function() Button:Destroy() end
+		}
+	end
+
+	function Window:Set(V1, V2)
+		if type(V1) == "string" then
+			Title.Text = V1
+			if type(V2) == "string" then SubTitle.Text = V2 end
+		end
+	end
+
+	function Window:Dialog(Cfg)
+		if MainFrame:FindFirstChild("Dialog") then return end
+		if Minimized then Window:MinimizeBtn() end
+
+		local DTitle = Cfg[1] or Cfg.Title or "Dialog"
+		local DText = Cfg[2] or Cfg.Text or "This is a Dialog"
+		local DOptions = Cfg[3] or Cfg.Options or {}
+		local DType = Cfg.Type or "default"
+		local baseW, baseH = unpack(DialogSizes[DType] or DialogSizes.default)
+		local Icon = Cfg.Icon and Cfg.Icon ~= "" and Trim(Cfg.Icon) or DialogIcons[DType] or DialogIcons.info
+
+		local Screen = InsertTheme(Create("Frame", MainFrame, {
+			BackgroundTransparency = 1, Active = true, BackgroundColor3 = Theme["Color Stroke"], Size = UD2(1, 0, 1, 0), Name = "Dialog"
+		}), "Stroke")
+		MainCorner:Clone().Parent = Screen
+
+		local Frame = InsertTheme(Create("Frame", Screen, {
+			Active = true, Size = UDim2.fromOffset(baseW * 1.06, baseH * 1.06), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundTransparency = 0.08, BackgroundColor3 = Theme["Color Hub 2"], ClipsDescendants = true
+		}), "Frame")
+		Make("Gradient", Frame, {Rotation = 270})
+		Make("Corner", Frame)
+
+		local DTop = Create("Frame", Frame, {Size = UD2(1, 0, 0, 36), BackgroundTransparency = 1})
+		InsertTheme(Create("ImageLabel", DTop, {
+			Size = UDim2.fromOffset(16, 16), Position = UD2(0, 12, 0.5), AnchorPoint = Vector2.new(0, 0.5), Image = Icon, ImageColor3 = Theme["Color Theme"], BackgroundTransparency = 1
+		}), "Theme")
+		InsertTheme(Create("TextLabel", DTop, {
+			Font = Font.GothamBold, Size = UD2(1, -80, 1, 0), Text = DTitle, TextXAlignment = "Left", TextColor3 = Theme["Color Text"],
+			TextSize = 13, Position = UDim2.fromOffset(34, 0), BackgroundTransparency = 1, TextTruncate = "AtEnd"
+		}), "Text")
+		local XBtn = Create("ImageButton", DTop, {
+			Size = UDim2.fromOffset(14, 14), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), Image = "rbxassetid://10747384394",
+			ImageColor3 = Theme["Color Dark Text"], BackgroundTransparency = 1, AutoButtonColor = false
+		})
+		InsertTheme(Create("Frame", Frame, {
+			Size = UD2(1, -24, 0, 1), Position = UDim2.fromOffset(12, 36), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.75
+		}), "Theme")
+		InsertTheme(Create("TextLabel", Frame, {
+			Font = Font.GothamMedium, Size = UD2(1, -24, 0, 0), AutomaticSize = "Y", Text = DText, TextXAlignment = "Left", TextColor3 = Theme["Color Dark Text"],
+			TextSize = 11, Position = UDim2.fromOffset(12, 44), BackgroundTransparency = 1, TextWrapped = true, RichText = NeedsRichText(DText)
+		}), "DarkText")
+
+		local function Lbl(txt, y, size)
+			InsertTheme(Create("TextLabel", Frame, {
+				Font = Font.GothamBold, Size = UD2(1, -24, 0, 14), Position = UDim2.fromOffset(12, y), Text = txt, TextXAlignment = "Left",
+				TextSize = size or 9, TextColor3 = Theme["Color Dark Text"], BackgroundTransparency = 1, TextTruncate = "AtEnd"
+			}), "DarkText")
+		end
+		local function Field(y, w)
+			local h = InsertTheme(Create("Frame", Frame, {
+				Size = UD2(1, w or -24, 0, 24), Position = UDim2.fromOffset(12, y), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", h, UD(0, 5))
+			return InsertTheme(Create("TextBox", h, {
+				Size = UD2(1, -10, 1, 0), Position = UDim2.fromOffset(5, 0), BackgroundTransparency = 1, Font = Font.Gotham, TextSize = 9,
+				TextColor3 = Theme["Color Text"], PlaceholderText = "rbxassetid://...", PlaceholderColor3 = Theme["Color Dark Text"],
+				Text = "", ClearTextOnFocus = false, TextXAlignment = "Left"
+			}), "Text")
+		end
+		local function Preview(props)
+			local p = Create("ImageLabel", Frame, SetProps({BackgroundTransparency = 1, Image = "", Visible = false}, props))
+			Make("Corner", p, UD(0, 6))
+			return p
+		end
+
+		local Builders = {
+			theme = function()
+				Lbl("Select Theme:", 72)
+				local names = {}
+				for k in Themes do names[#names + 1] = k end
+				table.sort(names)
+				local Scroll = InsertTheme(Create("ScrollingFrame", Frame, {
+					Size = UD2(1, -24, 0, 80), Position = UDim2.fromOffset(12, 88), BackgroundTransparency = 1, ScrollBarThickness = 2,
+					ScrollBarImageColor3 = Theme["Color Theme"], BorderSizePixel = 0, CanvasSize = UDim2.new(), AutomaticCanvasSize = "Y", ScrollingDirection = "Y"
+				}, {
+					Create("UIGridLayout", {CellSize = UDim2.fromOffset(76, 22), CellPadding = UDim2.fromOffset(4, 4), SortOrder = "LayoutOrder"}),
+					Create("UIPadding", {PaddingBottom = UD(0, 4)})
+				}), "ScrollBar")
+				for _, t in names do
+					local B = InsertTheme(Create("TextButton", Scroll, {
+						Size = UDim2.fromOffset(76, 22), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = t == veltrolib.Save.Theme and 0.6 or 0.85,
+						Font = Font.GothamBold, Text = t, TextSize = 8, TextColor3 = Theme["Color Text"], AutoButtonColor = false, Name = t
+					}), "Theme")
+					Make("Corner", B, UD(0, 4))
+					B.Activated:Connect(function()
+						veltrolib:SetTheme(t)
+						for _, ch in Scroll:GetChildren() do
+							if ch:IsA("TextButton") then ch.BackgroundTransparency = ch.Name == t and 0.6 or 0.85 end
+						end
+					end)
+				end
+				Lbl("Custom Theme Image (rbxassetid / catbox):", 172, 8)
+				local Input = Field(186, -54)
+				local Pv = Preview({Size = UDim2.fromOffset(24, 24), Position = UD2(1, -12, 0, 186), AnchorPoint = Vector2.new(1, 0)})
+				Input.FocusLost:Connect(function()
+					local id = Trim(Input.Text)
+					if id ~= "" then Pv.Image, Pv.Visible = id, true end
+				end)
+			end,
+			image = function()
+				Lbl("Minimize Button Image:", 72)
+				local BtnIn = Field(88)
+				Lbl("Main Frame Image:", 120)
+				local MainIn = Field(136)
+				local Pv = Preview({Size = UDim2.fromOffset(40, 40), Position = UD2(0.5, 0, 0, 162), AnchorPoint = Vector2.new(0.5, 0), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85})
+				BtnIn.FocusLost:Connect(function()
+					local id = Trim(BtnIn.Text)
+					if id == "" then return end
+					Pv.Image, Pv.Visible = id, true
+					MinimizeBtnCustomImage = id
+					MinimizeButton.Image = id
+					for _, b in veltrolib.Save.MinimizeButtons or {} do b.image = id end
+					SaveJson(veltrolib.Save)
+				end)
+				MainIn.FocusLost:Connect(function()
+					local id = Trim(MainIn.Text)
+					if id == "" then return end
+					id = veltrolib:GetIcon(id)
+					Pv.Image, Pv.Visible = id, true
+					veltrolib:SetBackgroundImage(id)
+				end)
+			end
+		}
+		local build = Builders[DType]
+		if build then build() end
+
+		local ButtonsHolder = Create("Frame", Frame, {
+			Size = UD2(1, -20, 0, 30), Position = UD2(0, 10, 1, -10), AnchorPoint = Vector2.new(0, 1), BackgroundTransparency = 1
+		}, {Create("UIListLayout", {Padding = UD(0, 8), VerticalAlignment = "Center", FillDirection = "Horizontal", HorizontalAlignment = "Center"})})
+
+		CreateTween({Frame, "Size", UDim2.fromOffset(baseW, baseH), 0.25})
+		CreateTween({Screen, "BackgroundTransparency", 0.35, 0.15})
+
+		local Dialog, Btns = {}, {}
+		function Dialog:Close()
+			CreateTween({Frame, "Size", UDim2.fromOffset(baseW * 1.06, baseH * 1.06), 0.2})
+			CreateTween({Screen, "BackgroundTransparency", 1, 0.15})
+			task.delay(0.2, Screen.Destroy, Screen)
+		end
+		function Dialog:Button(C)
+			local Color = C.Color
+			local Btn = InsertTheme(Create("TextButton", ButtonsHolder, {
+				BackgroundColor3 = Color or Theme["Color Theme"], BackgroundTransparency = Color and 0 or 0.7, Text = C[1] or C.Name or C.Title or "",
+				Font = Font.GothamBold, TextColor3 = Theme["Color Text"], TextSize = 11, AutoButtonColor = false
+			}), Color and "Stroke" or "Theme")
+			Make("Corner", Btn, UD(0, 5))
+			Btns[#Btns + 1] = Btn
+			local n = #Btns
+			for _, B in Btns do B.Size = UD2(1 / n, -(8 * (n - 1) / n), 0, 28) end
+			Btn.Activated:Connect(Dialog.Close)
+			Btn.Activated:Connect(C[2] or C.Callback or function() end)
+		end
+
+		XBtn.Activated:Connect(Dialog.Close)
+		XBtn.MouseEnter:Connect(function() CreateTween({XBtn, "ImageColor3", C3(255, 80, 80), 0.15}) end)
+		XBtn.MouseLeave:Connect(function() CreateTween({XBtn, "ImageColor3", Theme["Color Dark Text"], 0.15}) end)
+		for _, B in DOptions do Dialog:Button(B) end
+		return Dialog
+	end
+
+	function Window:SelectTab(T)
+		if type(T) == "number" then
+			veltrolib.Tabs[T].func:Enable()
+		else
+			for _, Tab in veltrolib.Tabs do
+				if Tab.Cont == T.Cont then Tab.func:Enable() end
+			end
+		end
+	end
+	function Window:SetTransparency(v) veltrolib:SetTransparency(v) end
+	function Window:SetTheme(n) veltrolib:SetTheme(n) end
+	function Window:SetLoadMethod(m) veltrolib:SetLoadMethod(m) end
+	function Window:SetBackgroundImage(v) veltrolib:SetBackgroundImage(v) end
+
+	function Window:Notify(Cfg)
+		Cfg = Cfg or {}
+		local NTitle = Cfg.Title or Cfg.Name or Cfg[1] or "Notification"
+		local NText = Cfg.Content or Cfg.Text or Cfg.Desc or Cfg[2] or ""
+		local NImage = Cfg.Image or Cfg.Icon
+		if NImage then NImage = veltrolib:GetIcon(tostring(NImage)) if NImage == "" then NImage = nil end end
+		local Duration = tonumber(Cfg.Duration) or 5
+		local Callback = Funcs.GetCallback(Cfg, 3)
+
+		NotificationCount += 1
+		local N, Closed, Paused = {}, false, false
+		local Card = Create("Frame", NotificationHolder, {
+			Size = UD2(0.85, 0, 0, 60), BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = NotificationCount, Name = "Notification"
+		})
+		local Scale = Create("UIScale", Card, {Scale = 1})
+		local Button = InsertTheme(Create("TextButton", Card, {
+			AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 1), Position = UDim2.fromScale(3, 0), AutoButtonColor = false, Text = "",
+			BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.1, Name = "Card"
+		}), "Theme")
+		Make("Corner", Button, UD(0, 9))
+		Make("Gradient", Button, {Rotation = 45})
+
+		local Holder = Create("Frame", Button, {
+			AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Name = "Holder"
+		}, {
+			Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UD(0, 4)}),
+			Create("UIPadding", {PaddingTop = UD(0, 8), PaddingBottom = UD(0, 8), PaddingLeft = UD(0, NImage and 40 or 15), PaddingRight = UD(0, 12)})
+		})
+		InsertTheme(Create("TextLabel", Holder, {
+			Size = UD2(1, 0, 0, 20), TextTruncate = Enum.TextTruncate.AtEnd, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Bottom,
+			BackgroundTransparency = 1, TextSize = 14, Font = Font.GothamBold, TextColor3 = Theme["Color Text"], RichText = NeedsRichText(NTitle), Text = NTitle, Name = "Title"
+		}), "Text")
+		InsertTheme(Create("TextLabel", Holder, {
+			Size = UD2(1, 0, 0, 20), TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1, TextWrapped = true, TextSize = 12, Font = Font.Gotham, TextColor3 = Theme["Color Dark Text"], RichText = NeedsRichText(NText), Text = NText, Name = "Body"
+		}), "DarkText")
+		if NImage then
+			InsertTheme(Create("ImageLabel", Button, {
+				Size = UDim2.fromOffset(24, 24), Position = UD2(0, 8, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), BackgroundTransparency = 1, ImageColor3 = Color3.new(1, 1, 1), Image = NImage, Name = "Icon"
+			}), "Text")
+		end
+		local Countdown = InsertTheme(Create("TextLabel", Button, {
+			Size = UD2(0, 40, 0, 16), Position = UD2(1, -10, 0, 8), AnchorPoint = Vector2.new(1, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right,
+			TextSize = 10, Font = Font.Gotham, TextColor3 = Theme["Color Dark Text"], Text = "", Name = "Countdown"
+		}), "DarkText")
+
+		function N:Close()
+			if Closed then return end
+			Closed = true
+			CreateTween({Button, "Position", UDim2.fromScale(3, 0), 0.8}).Completed:Wait()
+			Card:Destroy()
+			Funcs.FireCallback(Callback)
+		end
+		CreateTween({Button, "Position", UDim2.fromScale(0, 0), 0.35})
+		Button.MouseButton1Down:Connect(function() Paused = true CreateTween({Scale, "Scale", 1.22, 0.35}) end)
+		Button.MouseLeave:Connect(function() Paused = false CreateTween({Scale, "Scale", 1, 0.35}) end)
+		task.spawn(function()
+			local Left = Duration
+			while Left > 0 and not Closed do
+				Countdown.Text = tostring(math.ceil(Left))
+				local dt = task.wait()
+				if not Paused then Left -= dt end
+			end
+			N:Close()
+		end)
+		return N
+	end
+
+	local ContainerList = {}
+	function Window:AddTag(Cfg)
+		Cfg = Cfg or {}
+		local TTitle = Cfg[1] or Cfg.Title or Cfg.Name or ""
+		local TColor = Cfg.Color or C3(80, 80, 80)
+		local function Contrast(c) return (0.299 * c.R + 0.587 * c.G + 0.114 * c.B) > 0.6 and Color3.new(0, 0, 0) or Color3.new(1, 1, 1) end
+
+		local TagFrame = Create("Frame", TagHolder, {Size = UD2(0, 0, 0, 17), AutomaticSize = "X", BackgroundColor3 = TColor, ClipsDescendants = true, Name = "Tag"})
+		Make("Corner", TagFrame, UD(0, 3))
+		Create("Frame", TagFrame, {Size = UD2(1, 0, 0.5, 0), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.82, BorderSizePixel = 0, ZIndex = 2})
+		local Content = Create("Frame", TagFrame, {Size = UD2(0, 0, 1, 0), AutomaticSize = "X", BackgroundTransparency = 1, ZIndex = 3})
+		Create("UIListLayout", Content, {FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, HorizontalAlignment = Enum.HorizontalAlignment.Center})
+		Create("UIPadding", Content, {PaddingLeft = UD(0, 7), PaddingRight = UD(0, 7)})
+		local Lbl = Create("TextLabel", Content, {
+			Size = UD2(0, 0, 1, 0), AutomaticSize = "X", BackgroundTransparency = 1, Font = Font.GothamBold, TextSize = 10,
+			TextColor3 = Cfg.TextColor or Contrast(TColor), Text = TTitle, ZIndex = 4
+		})
+		local Tag = {}
+		function Tag:SetTitle(v) if type(v) == "string" then Lbl.Text = v end end
+		function Tag:SetColor(v) if typeof(v) == "Color3" then TagFrame.BackgroundColor3, Lbl.TextColor3 = v, Contrast(v) end end
+		function Tag:Visible(b) Funcs.ToggleVisible(TagFrame, b) end
+		function Tag:Destroy() TagFrame:Destroy() end
+		return Tag
+	end
+
+	function Window:MakeTab(paste, Cfg)
+		if type(paste) == "table" then Cfg = paste end
+		local IsFirst = not FirstTab
+		local TName = Cfg[1] or Cfg.Title or "Tab!"
+		local TIcon = veltrolib:GetIcon(tostring(Cfg[2] or Cfg.Icon or Cfg.Image or ""))
+		if TIcon == "" then TIcon = false end
+
+		local TabSelect = InsertTheme(Create("TextButton", MainScroll, {
+			Size = UD2(1, 0, 0, 23), BackgroundTransparency = 1, BackgroundColor3 = Theme["Color Theme"], Text = "", AutoButtonColor = false, Name = "TabBtn"
+		}), "TabBG")
+		Make("Corner", TabSelect, UD(0, 3))
+		local off = TIcon and 31 or 14
+		local LabelTitle = InsertTheme(Create("TextLabel", TabSelect, {
+			Size = UD2(1, -off - 8, 1), Position = UDim2.fromOffset(off, 0), BackgroundTransparency = 1, Font = Font.GothamBold, Text = TName,
+			TextColor3 = Theme["Color Text"], TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = "AtEnd"
+		}), "Text")
+		local LabelIcon = InsertTheme(Create("ImageLabel", TabSelect, {
+			Position = UD2(0, 10, 0.5), Size = UD2(0, 14, 0, 14), AnchorPoint = Vector2.new(0, 0.5), Image = TIcon or "", BackgroundTransparency = 1
+		}), "Text")
+		local Selected = InsertTheme(Create("Frame", TabSelect, {
+			Size = FirstTab and UD2(0, 3, 0, 0) or UD2(0, 3, 0.6, 0), Position = UD2(0, 0, 0.5), AnchorPoint = Vector2.new(0, 0.5),
+			BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = FirstTab and 1 or 0
+		}), "Theme")
+		Make("Corner", Selected, UD(0, 4))
+
+		local Container = InsertTheme(Create("ScrollingFrame", {
+			Size = UD2(1, 0, 1, -PAGE_TITLE_RESERVED), Position = UD2(0, 0, 1), AnchorPoint = Vector2.new(0, 1), ScrollBarThickness = 1.5,
+			BackgroundTransparency = 1, ScrollBarImageTransparency = 1, ScrollBarImageColor3 = Theme["Color Theme"], AutomaticCanvasSize = "Y",
+			ScrollingDirection = "Y", BorderSizePixel = 0, CanvasSize = UDim2.new(), Name = ("Container %i [ %s ]"):format(#ContainerList + 1, TName)
+		}, {
+			Create("UIPadding", {PaddingRight = UD(0, 5), PaddingTop = UD(0, 5), PaddingBottom = UD(0, 6)}),
+			Create("UIListLayout", {Padding = UD(0, 5)})
+		}), "ScrollBar")
+		ContainerList[#ContainerList + 1] = Container
+		if not FirstTab then
+			Container.Parent = Containers
+			PageTitleLabel.Text = TName
+			task.defer(function()
+				TabSelect.BackgroundTransparency = 0.85
+				TabSelect.BackgroundColor3 = Theme["Color Theme"]
+			end)
+		end
+
+		local Tab = {Cont = Container}
+		local function Tabs()
+			if Container.Parent then return end
+			for _, T in veltrolib.Tabs do
+				if T.Cont ~= Container then T.func:Disable() end
+			end
+			for _, F in ContainerList do
+				if F ~= Container then F.Parent = nil end
+			end
+			Container.Parent = Containers
+			PageTitleLabel.Text = TName
+			TabSelect.BackgroundTransparency = 0.85
+			TabSelect.BackgroundColor3 = Theme["Color Theme"]
+			CreateTween({Selected, "Size", UD2(0, 3, 0.6, 0), 0.25})
+			CreateTween({Selected, "BackgroundTransparency", 0, 0.25})
+		end
+		TabSelect.Activated:Connect(Tabs)
+
+		FirstTab = true
+		veltrolib.Tabs[#veltrolib.Tabs + 1] = {TabInfo = {Name = TName, Icon = TIcon}, func = Tab, Cont = Container, Button = TabSelect, LabelTitle = LabelTitle, LabelIcon = LabelIcon}
+
+		function Tab:Disable()
+			Container.Parent = nil
+			TabSelect.BackgroundTransparency = 1
+			CreateTween({Selected, "Size", UD2(0, 3, 0, 0), 0.35})
+			CreateTween({Selected, "BackgroundTransparency", 1, 0.35})
+		end
+		function Tab:Enable() Tabs() end
+		function Tab:Visible(b)
+			Funcs.ToggleVisible(TabSelect, b)
+			Funcs.ToggleParent(Container, b, Containers)
+		end
+		function Tab:Destroy() TabSelect:Destroy() Container:Destroy() end
+
+		function Tab:AddLoadMethod(C)
+			C = C or {}
+			return Tab:AddDropdown({
+				C[1] or C.Name or "Select Load Method", {"Fast", "Smooth"}, veltrolib.Save.LoadMethod,
+				function(v) veltrolib:SetLoadMethod(v) end, Desc = C.Desc or "Applies on next execute"
+			})
+		end
+
+		function Tab:AddDivider(C)
+			local DText = type(C) == "string" and C or (type(C) == "table" and (C[1] or C.Text or C.Title or C.Name)) or nil
+			local DIcon = type(C) == "table" and (C.Icon or C.Image) or nil
+			if DIcon then DIcon = veltrolib:GetIcon(tostring(DIcon)) if DIcon == "" then DIcon = nil end end
+
+			local D = Create("Frame", Container, {Size = UD2(1, 0, 0, DText and 20 or 10), BackgroundTransparency = 1, Name = "Option"})
+			if DText then
+				local x = 10
+				if DIcon then
+					InsertTheme(Create("ImageLabel", D, {
+						Size = UD2(0, 11, 0, 11), Position = UD2(0, 10, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), Image = DIcon, BackgroundTransparency = 1, ImageColor3 = Theme["Color Text"]
+					}), "Text")
+					x = 28
+				end
+				InsertTheme(Create("TextLabel", D, {
+					Font = Font.GothamBold, Text = DText, TextColor3 = Theme["Color Text"], TextSize = 11, Size = UD2(1, -x - 4, 1, 0), Position = UD2(0, x, 0, 0),
+					BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, Name = "DividerLabel"
+				}), "Text")
+			else
+				local L = InsertTheme(Create("Frame", D, {
+					Size = UD2(1, 0, 0, 6), Position = UD2(0, 0, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+				}), "Theme")
+				Make("Corner", L, UD(0.2, 0))
+			end
+			local Divider = {}
+			function Divider:Visible(b) Funcs.ToggleVisible(D, b) end
+			function Divider:Destroy() D:Destroy() end
+			return Divider
+		end
+
+		function Tab:AddSection(C)
+			C = type(C) == "string" and {Name = C} or (C or {})
+			local SName = C[1] or C.Name or C.Title or C.Section or "Section"
+			local StartOpen = C[2] or C.Open or C.Default or false
+			local SIcon = C.Icon or C.Image
+			if SIcon then SIcon = veltrolib:GetIcon(tostring(SIcon)) if SIcon == "" then SIcon = nil end end
+
+			local Wrapper = Create("Frame", Container, {Size = UD2(1, 0, 0, 23), BackgroundTransparency = 1, Name = "Option"})
+			local Header = InsertTheme(Create("TextButton", Wrapper, {
+				Size = UD2(1, 0, 0, 23), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Text = "", AutoButtonColor = false, Name = "SectionHeader"
+			}), "Theme")
+			Make("Corner", Header, UD(0, 3))
+			local lx = 12
+			if SIcon then
+				InsertTheme(Create("ImageLabel", Header, {
+					Size = UD2(0, 12, 0, 12), Position = UD2(0, 10, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), Image = SIcon, BackgroundTransparency = 1, ImageColor3 = Theme["Color Text"], Name = "SectionIcon"
+				}), "Text")
+				lx = 29
+			end
+			local HeaderLabel = InsertTheme(Create("TextLabel", Header, {
+				Font = Font.GothamBold, Text = SName, TextColor3 = Theme["Color Text"], TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left,
+				Size = UD2(1, -40, 1, 0), Position = UD2(0, lx, 0, 0), BackgroundTransparency = 1, TextTruncate = Enum.TextTruncate.AtEnd, Name = "SectionTitle"
+			}), "Text")
+			local Arrow = InsertTheme(Create("ImageLabel", Header, {
+				Image = "rbxassetid://10709791437", ImageColor3 = Theme["Color Text"], Size = UD2(0, 16, 0, 16), Position = UD2(1, -5, 0.5, 0),
+				AnchorPoint = Vector2.new(1, 0.5), BackgroundTransparency = 1, Name = "ArrowLabel"
+			}), "Text")
+			local Line = InsertTheme(Create("Frame", Wrapper, {
+				Size = UD2(1, 0, 0, 2), Position = UD2(0, 0, 0, 25.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 1, Name = "BottomLine"
+			}), "Theme")
+			Make("Corner", Line, UD(0.5, 0))
+			Create("UIGradient", Line, {Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.15, 0), NumberSequenceKeypoint.new(0.85, 0), NumberSequenceKeypoint.new(1, 1)})})
+
+			local Clip = Create("Frame", Wrapper, {Size = UD2(1, 0, 0, 0), Position = UD2(0, 0, 0, 25), BackgroundTransparency = 1, ClipsDescendants = true, Name = "SectionClip"})
+			local Inner = Create("Frame", Clip, {Size = UD2(1, 0, 0, 0), BackgroundTransparency = 1, Name = "SectionInner"})
+			Create("UIListLayout", Inner, {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UD(0, 5)})
+			Create("UIPadding", Inner, {PaddingTop = UD(0, 5), PaddingBottom = UD(0, 5)})
+
+			local Heights, Count, isOpen = {}, 0, false
+			local function InnerH()
+				local total, n = 0, 0
+				for _, h in Heights do total += h n += 1 end
+				return n == 0 and 0 or total + (n - 1) * 5 + 5.5
+			end
+			local function Apply()
+				local h = isOpen and InnerH() or 0
+				Inner.Size, Clip.Size = UD2(1, 0, 0, h), UD2(1, 0, 0, h)
+				Wrapper.Size = UD2(1, 0, 0, isOpen and 25 + h or 23)
+			end
+			local function SetOpen(s)
+				isOpen = s
+				CreateTween({Arrow, "Rotation", s and 90 or 0, 0.18})
+				CreateTween({Line, "BackgroundTransparency", s and 0 or 1, 0.15})
+				local h = s and InnerH() or 0
+				if s then
+					Inner.Size, Clip.Size, Wrapper.Size = UD2(1, 0, 0, 0), UD2(1, 0, 0, 0), UD2(1, 0, 0, 23)
+				end
+				CreateTween({Inner, "Size", UD2(1, 0, 0, h), 0.2})
+				CreateTween({Clip, "Size", UD2(1, 0, 0, h), 0.2})
+				CreateTween({Wrapper, "Size", UD2(1, 0, 0, s and 25 + h or 23), 0.2})
+			end
+			Header.Activated:Connect(function() SetOpen(not isOpen) end)
+			if StartOpen then task.defer(SetOpen, true) end
+
+			local Section = {}
+			veltrolib.Options[#veltrolib.Options + 1] = {type = "Section", Name = SName, func = Section}
+			function Section:Set(v) if v then HeaderLabel.Text = GetStr(v) end end
+			function Section:Visible(b) Funcs.ToggleVisible(Wrapper, b) end
+			function Section:Destroy() Wrapper:Destroy() end
+			function Section:Toggle() SetOpen(not isOpen) end
+			function Section:Open(b) SetOpen(b == nil or b) end
+
+			local function WithInner(method, default, cfg)
+				local before = {}
+				for _, c in Inner:GetChildren() do before[c] = true end
+				local prev = Container
+				Container = Inner
+				local result = method(Tab, cfg)
+				Container = prev
+
+				Count += 1
+				local id = Count
+				Heights[id] = default
+				for _, c in Inner:GetChildren() do
+					if not before[c] and (c:IsA("Frame") or c:IsA("TextButton")) then
+						if c.Size.Y.Offset > 0 then Heights[id] = c.Size.Y.Offset end
+						c:GetPropertyChangedSignal("Size"):Connect(function()
+							local h = c.Size.Y.Offset
+							if h > 0 and h ~= Heights[id] then Heights[id] = h Apply() end
+						end)
+						break
+					end
+				end
+				Apply()
+				return result
+			end
+			for n, h in {AddButton = 25, AddToggle = 25, AddSlider = 25, AddDropdown = 25, AddTextBox = 25, AddKeybind = 25, AddParagraph = 38, AddDivider = 10, AddDiscordInvite = 80, AddLoadMethod = 25} do
+				Section[n] = function(_, cfg) return WithInner(Tab[n], h, cfg) end
+			end
+			return Section
+		end
+
+		function Tab:AddParagraph(C)
+			local PName = C[1] or C.Title or "Paragraph"
+			local Paragraph, texts, i = {}, {}, 1
+			while C["Text" .. i] do texts[i] = tostring(C["Text" .. i]) i += 1 end
+
+			local Outer = InsertTheme(Create("TextButton", Container, {
+				Size = UD2(1, 0, 0, 25), Text = "", AutoButtonColor = false, BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"
+			}), "Theme")
+			Make("Corner", Outer, UD(0, 3))
+			local Inner = Create("Frame", Outer, {Size = UD2(1, -20, 0, 0), Position = UD2(0, 10, 0, 7), BackgroundTransparency = 1, Name = "InnerLayout"})
+			Create("UIListLayout", Inner, {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UD(0, 2)})
+
+			local function NewLabel(text, size, order, name)
+				return InsertTheme(Create("TextLabel", Inner, {
+					Size = UD2(1, 0, 0, 14), BackgroundTransparency = 1, Font = Font.GothamMedium, TextColor3 = Theme["Color Text"], TextSize = size,
+					TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, RichText = NeedsRichText(text), Text = text, LayoutOrder = order, Name = name
+				}), "Text")
+			end
+			local TitleL = NewLabel(PName, 10, 0, "Title")
+			local Lines = {}
+			for idx, t in texts do Lines[idx] = NewLabel(t, 9.5, idx, "Line" .. idx) end
+
+			local function Resize(n)
+				local total = 14 + n * 16
+				Inner.Size = UD2(1, -20, 0, total)
+				Outer.Size = UD2(1, 0, 0, total + 14)
+			end
+			Resize(#Lines)
+
+			local function SetText(lbl, v) v = GetStr(v) lbl.RichText = NeedsRichText(v) lbl.Text = v end
+			function Paragraph:SetTitle(v) SetText(TitleL, v) end
+			function Paragraph:SetLine(idx, v) if Lines[idx] then SetText(Lines[idx], v) end end
+			function Paragraph:Set(V1, V2)
+				local Cf = type(V1) == "table" and V1 or {Title = V1, Text1 = type(V2) == "string" and V2 ~= "" and V2 or nil}
+				if Cf.Title or Cf[1] then self:SetTitle(Cf.Title or Cf[1]) end
+				local n = 1
+				while Cf["Text" .. n] do
+					local lbl = Lines[n] or NewLabel("", 9.5, n, "Line" .. n)
+					Lines[n] = lbl
+					SetText(lbl, Cf["Text" .. n])
+					lbl.Visible = true
+					n += 1
+				end
+				for j = n, #Lines do Lines[j].Visible = false end
+				Resize(n - 1)
+			end
+			function Paragraph:Visible(b) Funcs.ToggleVisible(Outer, b) end
+			function Paragraph:Destroy() Outer:Destroy() end
+			return Paragraph
+		end
+
+		function Tab:AddButton(C)
+			local BName = C[1] or C.Name or C.Title or "Button!"
+			local Callback = Funcs.GetCallback(C, 2)
+			local BFlag = C[3] or C.Flag or false
+			local Pressed = CheckFlag(BFlag) and GetFlag(BFlag) == true
+
+			local FButton, LabelFunc = ButtonFrame(Container, BName, C.Desc or C.Description or "", UD2(1, -20))
+			Create("ImageLabel", FButton, {
+				Size = UD2(0, 14, 0, 14), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundTransparency = 1, Image = "rbxassetid://10734898194", ZIndex = 3
+			})
+			local Flash = Create("Frame", FButton, {Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, Active = false, ZIndex = 2})
+			Make("Corner", Flash, UD(0, 3))
+
+			local IsHeld, EndConn
+			local function Release()
+				if EndConn then EndConn:Disconnect() EndConn = nil end
+				IsHeld = false
+				CreateTween({Flash, "BackgroundTransparency", 1, 0.2})
+			end
+			FButton.MouseButton1Down:Connect(function()
+				IsHeld = true
+				Flash.BackgroundTransparency = 0.55
+				if EndConn then EndConn:Disconnect() end
+				EndConn = UIS.InputEnded:Connect(function(I) if IsPress(I) then Release() end end)
+			end)
+			FButton.MouseLeave:Connect(function() if IsHeld then Release() end end)
+			FButton.Activated:Connect(function()
+				Flash.BackgroundTransparency = 0.55
+				Release()
+				if BFlag then
+					Pressed = not Pressed
+					SetFlag(BFlag, Pressed)
+					Funcs.FireCallback(Callback, Pressed)
+				else
+					Funcs.FireCallback(Callback)
+				end
+			end)
+
+			local Button = {}
+			function Button:Visible(b) Funcs.ToggleVisible(FButton, b) end
+			function Button:Destroy() FButton:Destroy() end
+			function Button:Callback(f) Funcs.InsertCallback(Callback, f) end
+			function Button:Set(V1, V2)
+				local h = {
+					string = function() LabelFunc:SetTitle(V1) if type(V2) == "string" then LabelFunc:SetDesc(V2) end end,
+					boolean = function() if BFlag then Pressed = V1 SetFlag(BFlag, Pressed) end end,
+					["function"] = function() Funcs.SetCallback(Callback, V1) end
+				}
+				local f = h[type(V1)]
+				if f then f() end
+			end
+			return Button
+		end
+
+		function Tab:AddToggle(C)
+			local Callback = Funcs.GetCallback(C, 3)
+			local Flag = C[4] or C.Flag or false
+			local Default = C[2] or C.Default or false
+			if CheckFlag(Flag) then Default = GetFlag(Flag) end
+
+			local Button, LabelFunc = ButtonFrame(Container, C[1] or C.Name or C.Title or "Toggle", C.Desc or C.Description or "", UD2(1, -38))
+			local Holder = InsertTheme(Create("Frame", Button, {
+				Size = UD2(0, 35, 0, 18), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", Holder, UD(0.5, 0))
+			local Track = Create("Frame", Holder, {BackgroundTransparency = 1, Size = UD2(0.8, 0, 0.8, 0), Position = UD2(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5)})
+			local Knob = InsertTheme(Create("Frame", Track, {
+				Size = UD2(0, 12, 0, 12), Position = UD2(0, 0, 0.5), AnchorPoint = Vector2.new(0, 0.5), BackgroundColor3 = Theme["Color Theme"]
+			}), "Theme")
+			Make("Corner", Knob, UD(0.5, 0))
+
+			local Busy
+			local function SetToggle(Val)
+				if Busy then return end
+				Busy, Default = true, Val
+				SetFlag(Flag, Val)
+				Funcs.FireCallback(Callback, Val)
+				CreateTween({Knob, "Position", UD2(Val and 1 or 0, 0, 0.5), 0.25})
+				CreateTween({Knob, "BackgroundTransparency", Val and 0 or 0.8, 0.25})
+				CreateTween({Knob, "AnchorPoint", Vector2.new(Val and 1 or 0, 0.5), 0.25})
+				Busy = false
+			end
+			task.spawn(SetToggle, Default)
+			Button.Activated:Connect(function() SetToggle(not Default) end)
+
+			local Toggle = {}
+			function Toggle:Visible(b) Funcs.ToggleVisible(Button, b) end
+			function Toggle:Destroy() Button:Destroy() end
+			function Toggle:Callback(f) Funcs.InsertCallback(Callback, f)(Default) end
+			function Toggle:Set(V1, V2)
+				local h = {
+					string = function() LabelFunc:SetTitle(V1) if type(V2) == "string" then LabelFunc:SetDesc(V2) end end,
+					boolean = function()
+						if Busy and V2 then repeat task.wait() until not Busy end
+						task.spawn(SetToggle, V1)
+					end,
+					["function"] = function() Funcs.SetCallback(Callback, V1) end
+				}
+				local f = h[type(V1)]
+				if f then f() end
+			end
+			return Toggle
+		end
+
+		function Tab:AddKeybind(C)
+			local Default = C[2] or C.Default or Enum.KeyCode.LeftShift
+			local Callback = C[3] or C.Callback
+			local Flag = C[4] or C.Flag or false
+			if typeof(Default) ~= "EnumItem" then Default = Enum.KeyCode.LeftShift end
+			if CheckFlag(Flag) then
+				local saved = GetFlag(Flag)
+				if type(saved) == "string" and #saved > 0 then
+					local ok, p = pcall(function() return Enum.KeyCode[saved] end)
+					if ok and p then Default = p end
+				end
+			end
+
+			local Button = ButtonFrame(Container, C[1] or C.Name or C.Title or "Keybind", C.Desc or C.Description or "", UD2(1, -130))
+			local KeyFrame = InsertTheme(Create("Frame", Button, {
+				Size = UD2(0, 110, 0, 18), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", KeyFrame, UD(0, 4))
+			local KeyLabel = InsertTheme(Create("TextLabel", KeyFrame, {
+				Size = UD2(1, -10, 0.85, 0), AnchorPoint = Vector2.new(0.5, 0.5), Position = UD2(0.5, 0, 0.5, 0), BackgroundTransparency = 1,
+				Font = Font.GothamBold, TextSize = 10, TextTruncate = Enum.TextTruncate.AtEnd, TextColor3 = Theme["Color Text"], Text = Default.Name
+			}), "Text")
+
+			local current, listening, bindConn = Default, false
+			local function SetKey(k) current, KeyLabel.Text = k, k.Name SetFlag(Flag, k.Name) end
+			Button.Activated:Connect(function()
+				if listening then return end
+				listening = true
+				KeyLabel.Text = "..."
+				bindConn = UIS.InputBegan:Connect(function(input)
+					if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+					listening = false
+					bindConn:Disconnect()
+					if input.KeyCode == Enum.KeyCode.Escape then KeyLabel.Text = current.Name else SetKey(input.KeyCode) end
+				end)
+			end)
+			local pressConn = UIS.InputBegan:Connect(function(input, gp)
+				if gp or listening or input.UserInputType ~= Enum.UserInputType.Keyboard or input.KeyCode ~= current then return end
+				if type(Callback) == "function" then task.spawn(Callback, current) else Window:Minimize() end
+			end)
+			local function Cleanup() pressConn:Disconnect() if bindConn then bindConn:Disconnect() end end
+			MainFrame.Destroying:Connect(Cleanup)
+
+			local Keybind = {}
+			function Keybind:Set(k) if typeof(k) == "EnumItem" then SetKey(k) end end
+			function Keybind:Get() return current end
+			function Keybind:Visible(b) Funcs.ToggleVisible(Button, b) end
+			function Keybind:Destroy() Button:Destroy() Cleanup() end
+			return Keybind
+		end
+
+		function Tab:AddDropdown(C)
+			local DOptions = C[2] or C.Options or {}
+			local OpDefault = C[3] or C.Default or {}
+			local Flag = C[5] or C.Flag or false
+			local Multi = C.MultiSelect or false
+			local Callback = Funcs.GetCallback(C, 4)
+
+			local Z, DropWidth = 100, 152
+			local OptTrans = PanelT(0.55)
+			local Button = ButtonFrame(Container, C[1] or C.Name or C.Title or "Dropdown", C.Desc or C.Description or "", UD2(1, -180))
+
+			local SelFrame = InsertTheme(Create("Frame", Button, {
+				Size = UD2(0, 150, 0, 18), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", SelFrame, UD(0, 4))
+			local ActiveLabel = InsertTheme(Create("TextLabel", SelFrame, {
+				Size = UD2(1, -33, 0.85, 0), AnchorPoint = Vector2.new(0, 0.5), Position = UD2(0, 8, 0.5, 0), BackgroundTransparency = 1, Font = Font.GothamBold,
+				TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Theme["Color Text"], Text = "...", ClipsDescendants = true
+			}), "Text")
+			local Arrow = Create("ImageLabel", SelFrame, {
+				Size = UD2(0, 14, 0, 14), Position = UD2(1, -8, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), Image = "rbxassetid://10709790948", BackgroundTransparency = 1
+			})
+			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
+			local DropFrame = Create("Frame", NoClick, {
+				Size = UD2(0, DropWidth, 0, 0), BackgroundTransparency = 0.1, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0, 1),
+				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
+			})
+			Make("Corner", DropFrame)
+			Make("Stroke", DropFrame)
+			Make("Gradient", DropFrame, {Rotation = 60})
+
+			local SearchHolder = InsertTheme(Create("Frame", DropFrame, {
+				Size = UD2(1, -10, 0, 22), Position = UD2(0, 5, 0, 4), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "SearchHolder", ZIndex = Z
+			}), "Theme")
+			Make("Corner", SearchHolder, UD(0, 4))
+			InsertTheme(Create("ImageLabel", SearchHolder, {
+				Size = UD2(0, 12, 0, 12), Position = UD2(0, 5, 0.5), AnchorPoint = Vector2.new(0, 0.5), BackgroundTransparency = 1, Image = "rbxassetid://10734943674", ImageColor3 = Theme["Color Dark Text"], ZIndex = Z
+			}), "DarkText")
+			local SearchBox = InsertTheme(Create("TextBox", SearchHolder, {
+				Size = UD2(1, -24, 1, 0), Position = UD2(0, 20, 0, 0), BackgroundTransparency = 1, Font = Font.Gotham, TextSize = 9, TextColor3 = Theme["Color Text"],
+				PlaceholderText = "Search...", PlaceholderColor3 = Theme["Color Dark Text"], Text = "", ClearTextOnFocus = false, TextXAlignment = "Left", ZIndex = Z
+			}), "Text")
+			local ScrollFrame = InsertTheme(Create("ScrollingFrame", DropFrame, {
+				ScrollBarImageColor3 = Theme["Color Theme"], Size = UD2(1, 0, 1, -30), Position = UD2(0, 0, 0, 30), ScrollBarThickness = 1.5, BackgroundTransparency = 1,
+				BorderSizePixel = 0, CanvasSize = UDim2.new(), ScrollingDirection = "Y", AutomaticCanvasSize = "Y", Active = true, ZIndex = Z
+			}, {
+				Create("UIPadding", {PaddingLeft = UD(0, 5), PaddingRight = UD(0, 5), PaddingTop = UD(0, 5), PaddingBottom = UD(0, 5)}),
+				Create("UIListLayout", {Padding = UD(0, 4)})
+			}), "ScrollBar")
+
+			local Options, Order, SelectedValues, InitialSet = {}, {}, {}, {}
+			local Selected, CurrentOpt
+			local VisibleCount, Query, ScrollSize, WaitDrop = 0, "", 5, false
+
+			local savedFlag = CheckFlag(Flag) and GetFlag(Flag) or nil
+			local Defaults = type(OpDefault) ~= "table" and {OpDefault} or OpDefault
+			if Multi then
+				local src = savedFlag or Defaults
+				if type(src) == "table" then for _, v in src do if type(v) == "string" then InitialSet[v] = true end end end
+			else
+				Selected = type(savedFlag) == "string" and savedFlag or Defaults[1]
+			end
+
+			local function FrameSize() return UDim2.fromOffset(DropWidth, ScrollSize + 30) end
+			local function Resize()
+				ScrollSize = math.min(VisibleCount, 10) * 25 + 10
+				if NoClick.Visible then CreateTween({DropFrame, "Size", FrameSize(), 0.2}) end
+			end
+			local function CalcPos(instant)
+				local fp, ss = SelFrame.AbsolutePosition, ScreenGui.AbsoluteSize
+				local pos = UDim2.fromOffset(math.clamp(fp.X / UIScale, 0, ss.X / UIScale - DropWidth), math.clamp(fp.Y / UIScale, 0, ss.Y / UIScale))
+				DropFrame.AnchorPoint = Vector2.new(0, fp.Y > ss.Y / 1.4 and 1 or ScrollSize > 80 and 0.5 or 0)
+				if instant then DropFrame.Position = pos else CreateTween({DropFrame, "Position", pos, 0.1}) end
+			end
+			local function Disable()
+				if not NoClick.Visible then return end
+				WaitDrop = true
+				CreateTween({Arrow, "ImageColor3", Color3.new(1, 1, 1), 0.2})
+				CreateTween({DropFrame, "Size", UD2(0, DropWidth, 0, 0), 0.2, true})
+				Arrow.Image = "rbxassetid://10709790948"
+				NoClick.Visible = false
+				if SearchBox.Text ~= "" then SearchBox.Text = "" end
+				WaitDrop = false
+			end
+			local function Toggle()
+				if WaitDrop then return end
+				if NoClick.Visible then return Disable() end
+				WaitDrop = true
+				CalcPos(true)
+				NoClick.Visible = true
+				Arrow.Image = "rbxassetid://10709791523"
+				CreateTween({Arrow, "ImageColor3", Theme["Color Theme"], 0.2})
+				CreateTween({DropFrame, "Size", FrameSize(), 0.2, true})
+				WaitDrop = false
+			end
+
+			local MeasureBox = Vector2.new(1e5, 1e5)
+			local function TWidth(s) return TextService:GetTextSize(s, 10, Font.GothamBold, MeasureBox).X end
+			local function FitText(s)
+				if TWidth(s) <= 117 then return s end
+				local lo, hi = 0, utf8.len(s) or #s
+				while lo < hi do
+					local mid = math.ceil((lo + hi) / 2)
+					if TWidth(s:sub(1, (utf8.offset(s, mid + 1) or #s + 1) - 1)) <= 117 then lo = mid else hi = mid - 1 end
+				end
+				return s:sub(1, (utf8.offset(s, lo + 1) or #s + 1) - 1)
+			end
+			local function UpdateLabel()
+				local t
+				if Multi then
+					t = #SelectedValues > 0 and table.concat(SelectedValues, ", ") or "..."
+				else
+					t = Selected ~= nil and tostring(Selected) or "..."
+					if t == "" then t = "..." end
+				end
+				ActiveLabel.Text = FitText(t)
+			end
+			local function Fire()
+				if Multi then
+					SetFlag(Flag, SelectedValues)
+					Funcs.FireCallback(Callback, SelectedValues)
+				else
+					SetFlag(Flag, tostring(Selected or ""))
+					Funcs.FireCallback(Callback, Selected)
+				end
+			end
+			local function SetState(Opt, On, Instant)
+				if Opt.on == On then return end
+				Opt.on = On
+				local Btn, Label, Ball = unpack(Opt.nodes, 1, 3)
+				Btn:SetAttribute("Selected", On)
+				local Trans = On and 0.85 or OptTrans
+				Btn.BackgroundColor3 = On and Theme["Color Theme"] or Theme["Color Hub 2"]
+				if Instant or not On then
+					Btn.BackgroundTransparency = Trans
+					Label.TextTransparency = On and 0 or 0.4
+					if Ball then Ball.BackgroundTransparency = On and 0 or 0.8 end
+				else
+					Btn.BackgroundTransparency = OptTrans
+					CreateTween({Btn, "BackgroundTransparency", Trans, 0.12})
+					CreateTween({Label, "TextTransparency", 0, 0.12})
+					if Ball then CreateTween({Ball, "BackgroundTransparency", 0, 0.12}) end
+				end
+			end
+			local function RemoveValue(n) local i = table.find(SelectedValues, n) if i then table.remove(SelectedValues, i) end end
+			local function SelectOpt(Opt)
+				if Multi then
+					local On = not Opt.on
+					if On then SelectedValues[#SelectedValues + 1] = Opt.Name else RemoveValue(Opt.Name) end
+					SetState(Opt, On)
+				else
+					if CurrentOpt and CurrentOpt ~= Opt then SetState(CurrentOpt, false) end
+					CurrentOpt, Selected = Opt, Opt.Value
+					SetState(Opt, true)
+				end
+				UpdateLabel()
+				Fire()
+			end
+
+			local function AddOption(index, Value)
+				local Name = tostring(type(index) == "string" and index or Value)
+				if Options[Name] then return end
+				local Opt = {index = index, Value = Value, Name = Name, lower = Name:lower()}
+				Options[Name] = Opt
+				Order[#Order + 1] = Opt
+
+				local Btn = Make("Button", ScrollFrame, {Name = "Option", Size = UD2(1, 0, 0, 21), ZIndex = Z})
+				Make("Corner", Btn, UD(0, 4))
+				InsertTheme(Btn, "DropdownOpt")
+				local Ball
+				if Multi then
+					Ball = InsertTheme(Create("Frame", Btn, {
+						Position = UD2(0, 8, 0.5), Size = UD2(0, 4, 0, 4), AnchorPoint = Vector2.new(0, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.8, ZIndex = Z
+					}), "Theme")
+					Make("Corner", Ball, UD(0.5, 0))
+				end
+				local OptLabel = InsertTheme(Create("TextLabel", Btn, {
+					Size = UD2(1, Multi and -27 or -16, 1, 0), Position = UD2(0, Multi and 19 or 8), Text = Name, TextColor3 = Theme["Color Text"], Font = Font.GothamBold,
+					TextXAlignment = "Left", BackgroundTransparency = 1, TextTransparency = 0.4, ZIndex = Z
+				}), "Text")
+				Opt.nodes = {Btn, OptLabel, Ball}
+				Opt.visible = Query == "" or Opt.lower:find(Query, 1, true) ~= nil
+				Btn.Visible = Opt.visible
+				if Opt.visible then VisibleCount += 1 end
+
+				local On
+				if Multi then
+					On = InitialSet[Name] == true
+					if On then SelectedValues[#SelectedValues + 1] = Name end
+				else
+					On = CurrentOpt == nil and Selected ~= nil and Value == Selected
+					if On then CurrentOpt = Opt end
+				end
+				SetState(Opt, On, true)
+				Btn.Activated:Connect(function() SelectOpt(Opt) end)
+				Resize()
+			end
+			local function RemoveOption(Opt)
+				if not Opt then return end
+				Options[Opt.Name] = nil
+				local i = table.find(Order, Opt)
+				if i then table.remove(Order, i) end
+				if Opt.visible then VisibleCount -= 1 end
+				if Multi and Opt.on then RemoveValue(Opt.Name) end
+				if not Multi and CurrentOpt == Opt then CurrentOpt, Selected = nil, nil end
+				Opt.nodes[1]:Destroy()
+				UpdateLabel()
+				Resize()
+			end
+			local function AddNew(List, Clear)
+				if Clear then
+					for _, Opt in Order do Opt.nodes[1]:Destroy() end
+					table.clear(Options) table.clear(Order) table.clear(SelectedValues) table.clear(InitialSet)
+					VisibleCount, Selected, CurrentOpt = 0, nil, nil
+				end
+				for i, v in List do AddOption(i, v) end
+				UpdateLabel()
+				Fire()
+			end
+
+			for i, v in DOptions do AddOption(i, v) end
+			UpdateLabel()
+			Fire()
+
+			SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+				Query = SearchBox.Text:lower()
+				local n = 0
+				for _, Opt in Order do
+					local m = Query == "" or Opt.lower:find(Query, 1, true) ~= nil
+					if Opt.visible ~= m then Opt.visible = m Opt.nodes[1].Visible = m end
+					if m then n += 1 end
+				end
+				VisibleCount = n
+				Resize()
+			end)
+			Button.Activated:Connect(Toggle)
+			NoClick.MouseButton1Down:Connect(function()
+				local dp, ds = DropFrame.AbsolutePosition, DropFrame.AbsoluteSize
+				local mx, my = PlayerMouse.X, PlayerMouse.Y
+				if mx >= dp.X and mx <= dp.X + ds.X and my >= dp.Y and my <= dp.Y + ds.Y then return end
+				Disable()
+			end)
+			MainFrame:GetPropertyChangedSignal("Visible"):Connect(Disable)
+			SelFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function() if NoClick.Visible then CalcPos() end end)
+
+			local Dropdown = {}
+			function Dropdown:Visible(b) Funcs.ToggleVisible(Button, b) end
+			function Dropdown:Destroy() Button:Destroy() NoClick:Destroy() end
+			function Dropdown:Callback(f) Funcs.InsertCallback(Callback, f)(Multi and SelectedValues or Selected) end
+			function Dropdown:Add(...)
+				local New = {...}
+				if type(New[1]) == "table" then New = New[1] end
+				for _, n in New do AddOption(n, n) end
+			end
+			function Dropdown:Remove(o) RemoveOption(type(o) == "number" and Order[o] or Options[tostring(o)]) end
+			function Dropdown:Select(o)
+				local Mode = {
+					multiList = function()
+						local Want = {}
+						table.clear(SelectedValues)
+						for _, v in o do
+							local n = tostring(v)
+							if Options[n] and not Want[n] then Want[n] = true SelectedValues[#SelectedValues + 1] = n end
+						end
+						for _, Opt in Order do SetState(Opt, Want[Opt.Name] == true) end
+					end,
+					multiOne = function()
+						local Opt = Options[tostring(o)]
+						if not Opt then return end
+						local On = not Opt.on
+						if On then SelectedValues[#SelectedValues + 1] = Opt.Name else RemoveValue(Opt.Name) end
+						SetState(Opt, On)
+					end,
+					single = function()
+						local Opt = type(o) == "number" and Order[o] or Options[tostring(o)]
+						if not Opt then return end
+						if CurrentOpt and CurrentOpt ~= Opt then SetState(CurrentOpt, false) end
+						CurrentOpt, Selected = Opt, Opt.Value
+						SetState(Opt, true)
+					end
+				}
+				Mode[Multi and (type(o) == "table" and "multiList" or "multiOne") or "single"]()
+				UpdateLabel()
+				SetFlag(Flag, Multi and SelectedValues or tostring(Selected or ""))
+			end
+			function Dropdown:Set(V, Clear)
+				local h = {table = function() AddNew(V, not Clear) end, ["function"] = function() Funcs.SetCallback(Callback, V) end}
+				local f = h[type(V)]
+				if f then f() end
+			end
+			return Dropdown
+		end
+
+		function Tab:AddSlider(C)
+			local Min = C[2] or C.MinValue or C.Min or 0
+			local Max = C[3] or C.MaxValue or C.Max or 100
+			local Inc = C[4] or C.Increase or 1
+			local Callback = Funcs.GetCallback(C, 6)
+			local Flag = C[7] or C.Flag or false
+			local Default = C[5] or C.Default or Min
+			if CheckFlag(Flag) then Default = GetFlag(Flag) end
+			Default = math.clamp(tonumber(Default) or Min, Min, Max)
+
+			local Button, LabelFunc = ButtonFrame(Container, C[1] or C.Name or C.Title or "Slider!", C.Desc or C.Description or "", UD2(1, -180))
+			local RM, IW, GAP = 10, 38, 8
+			local SW = 150 - IW - GAP
+
+			local Holder = Create("TextButton", Button, {
+				Size = UD2(0, SW, 1, 0), Position = UD2(1, -RM, 0, 0), AnchorPoint = Vector2.new(1, 0), AutoButtonColor = false, Text = "", BackgroundTransparency = 1
+			})
+			local Bar = InsertTheme(Create("Frame", Holder, {
+				BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Size = UD2(1, 0, 0, 6), Position = UD2(1, 0, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5)
+			}), "Theme")
+			Make("Corner", Bar, UD(0.5, 0))
+			local Indicator = InsertTheme(Create("Frame", Bar, {BackgroundColor3 = Theme["Color Theme"], Size = UDim2.fromScale(0, 1), BorderSizePixel = 0}), "Theme")
+			Make("Corner", Indicator, UD(0.5, 0))
+			local Icon = InsertTheme(Create("Frame", Bar, {
+				Size = UD2(0, 12, 0, 12), BackgroundColor3 = Theme["Color Theme"], Position = UDim2.fromScale(0, 0.5), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 0.2
+			}), "Theme")
+			Make("Corner", Icon, UD(0.5, 0))
+			local InputHolder = InsertTheme(Create("Frame", Button, {
+				Size = UD2(0, IW, 0, 18), Position = UD2(1, -(RM + SW + GAP), 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", InputHolder, UD(0, 4))
+			local ValueInput = InsertTheme(Create("TextBox", InputHolder, {
+				Size = UD2(1, -6, 0.85, 0), AnchorPoint = Vector2.new(0.5, 0.5), Position = UD2(0.5, 0, 0.5, 0), BackgroundTransparency = 1, Font = Font.FredokaOne,
+				TextScaled = true, TextColor3 = Theme["Color Text"], Text = tostring(Default), ClearTextOnFocus = true, TextXAlignment = "Center"
+			}), "Text")
+
+			local cur, focused = Default, false
+			local Decimals = #(tostring(Inc):match("%.(%d+)") or "")
+			local factor = 10 ^ Decimals
+			local function Snap(v) return math.clamp(math.floor(math.floor(v / Inc + 0.5) * Inc * factor + 0.5) / factor, Min, Max) end
+			local function Fmt(v) return Decimals == 0 and tostring(math.floor(v)) or string.format("%." .. Decimals .. "f", v) end
+			local function Visual(v)
+				local s = Max == Min and 0 or math.clamp((v - Min) / (Max - Min), 0, 1)
+				Icon.Position, Indicator.Size = UD2(s, 0, 0.5, 0), UDim2.fromScale(s, 1)
+			end
+			local function SetSlider(v, skip)
+				if type(v) ~= "number" then return end
+				v = Snap(v)
+				cur = v
+				Visual(v)
+				if not focused then ValueInput.Text = Fmt(v) end
+				if not skip then
+					SetFlag(Flag, v)
+					Funcs.FireCallback(Callback, v)
+				end
+			end
+
+			Holder.MouseButton1Down:Connect(function()
+				Container.ScrollingEnabled = false
+				while Held() do
+					task.wait()
+					SetSlider(Snap(math.clamp((PlayerMouse.X - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X, 0, 1) * (Max - Min) + Min))
+				end
+				Container.ScrollingEnabled = true
+			end)
+			ValueInput:GetPropertyChangedSignal("Text"):Connect(function()
+				local clean = ValueInput.Text:gsub("[^%d%.%-]", "")
+				if clean ~= ValueInput.Text then ValueInput.Text = clean end
+			end)
+			ValueInput.Focused:Connect(function() focused = true Container.ScrollingEnabled = false end)
+			ValueInput.FocusLost:Connect(function()
+				focused = false
+				Container.ScrollingEnabled = true
+				local n = tonumber(ValueInput.Text)
+				if not n then ValueInput.Text = Fmt(cur) return end
+				local cl = math.clamp(n, Min, Max)
+				cur = cl
+				Visual(cl)
+				if cl ~= n then ValueInput.Text = Fmt(cl) end
+				SetFlag(Flag, cl)
+				Funcs.FireCallback(Callback, cl)
+			end)
+
+			SetSlider(Default, not CheckFlag(Flag))
+			SetFlag(Flag, Default)
+
+			local Slider = {}
+			function Slider:Set(V1, V2)
+				if V1 and V2 then LabelFunc:SetTitle(V1) LabelFunc:SetDesc(V2) return end
+				local h = {
+					string = function() LabelFunc:SetTitle(V1) end,
+					["function"] = function() Funcs.SetCallback(Callback, V1) end,
+					number = function() SetSlider(V1) end
+				}
+				local f = h[type(V1)]
+				if f then f() end
+			end
+			function Slider:Callback(f) Funcs.InsertCallback(Callback, f)(cur) end
+			function Slider:Visible(b) Funcs.ToggleVisible(Button, b) end
+			function Slider:Destroy() Button:Destroy() end
+			return Slider
+		end
+
+		function Tab:AddTextBox(C)
+			local Default = C[2] or C.Default or ""
+			local ClearText = C[3] or C.ClearText or false
+			local Callback = Funcs.GetCallback(C, 4)
+			local Placeholder = C[5] or C.PlaceholderText or "Input"
+			local Flag = C.Flag or C[6] or false
+			if CheckFlag(Flag) and type(GetFlag(Flag)) == "string" then Default = GetFlag(Flag) end
+			if type(Default) ~= "string" then Default = "" end
+
+			local Button = ButtonFrame(Container, C[1] or C.Name or C.Title or "Text Box", C.Desc or C.Description or "", UD2(1, -38))
+			local Sel = InsertTheme(Create("Frame", Button, {
+				Size = UD2(0, 150, 0, 18), Position = UD2(1, -10, 0.5), AnchorPoint = Vector2.new(1, 0.5), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85
+			}), "Theme")
+			Make("Corner", Sel, UD(0, 4))
+			local Input = InsertTheme(Create("TextBox", Sel, {
+				Size = UD2(0.85, 0, 0.85, 0), AnchorPoint = Vector2.new(0.5, 0.5), Position = UD2(0.5, 0, 0.5, 0), BackgroundTransparency = 1, Font = Font.GothamBold,
+				TextScaled = true, TextColor3 = Theme["Color Text"], ClearTextOnFocus = ClearText, PlaceholderText = Placeholder, Text = Default
+			}), "Text")
+
+			local TextBox = {OnChanging = false}
+			Input.FocusLost:Connect(function()
+				local t = Input.Text
+				if t:gsub(" ", ""):len() == 0 then return end
+				if TextBox.OnChanging then t = TextBox.OnChanging(t) or t end
+				Funcs.FireCallback(Callback, t)
+				Input.Text = t
+				SetFlag(Flag, t)
+			end)
+			if Default ~= "" then
+				task.defer(function()
+					Funcs.FireCallback(Callback, Default)
+					SetFlag(Flag, Default)
+				end)
+			end
+			function TextBox:Visible(b) Funcs.ToggleVisible(Button, b) end
+			function TextBox:Destroy() Button:Destroy() end
+			function TextBox:Set(V)
+				local h = {
+					string = function() Input.Text = V SetFlag(Flag, V) Funcs.FireCallback(Callback, V) end,
+					["function"] = function() Funcs.SetCallback(Callback, V) end
+				}
+				local f = h[type(V)]
+				if f then f() end
+			end
+			return TextBox
+		end
+
+		function Tab:AddDiscordInvite(C)
+			local InvTitle = C[1] or C.Name or C.Title or "Discord"
+			local Desc = C.Desc or C.Description or ""
+			local Logo = C[2] or C.Logo or ""
+			local Invite = C[3] or C.Invite or ""
+			local hasLogo = type(Logo) == "string" and Logo:gsub(" ", ""):len() > 0
+			if hasLogo then Logo = veltrolib:GetIcon(Logo) end
+
+			local Card = InsertTheme(Create("Frame", Container, {Size = UD2(1, 0, 0, 80), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"}), "Theme")
+			Make("Corner", Card, UD(0, 3))
+			if hasLogo then
+				local IF = InsertTheme(Create("Frame", Card, {
+					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.75, Name = "LogoFrame"
+				}), "Theme")
+				Make("Corner", IF, UD(0, 5))
+				Create("ImageLabel", IF, {
+					Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1), ImageTransparency = 0.1, ScaleType = Enum.ScaleType.Crop
+				}, {Create("UICorner", {CornerRadius = UD(0, 5)})})
+			end
+			local x = hasLogo and 50 or 10
+			InsertTheme(Create("TextLabel", Card, {
+				Font = Font.GothamBold, TextColor3 = Theme["Color Text"], Size = UD2(1, -(x + 10), 0, 14), Position = UD2(0, x, 0, 9), BackgroundTransparency = 1,
+				TextTruncate = "AtEnd", TextSize = 11, TextXAlignment = "Left", Text = InvTitle
+			}), "Text")
+			InsertTheme(Create("TextLabel", Card, {
+				Font = Font.Gotham, TextColor3 = Theme["Color Dark Text"], Size = UD2(1, -(x + 10), 0, 22), Position = UD2(0, x, 0, 24), BackgroundTransparency = 1,
+				TextWrapped = true, TextTruncate = "None", TextSize = 9, TextXAlignment = "Left", TextYAlignment = "Top", Text = Desc
+			}), "DarkText")
+			local Join = InsertTheme(Create("TextButton", Card, {
+				Size = UD2(1, -16, 0, 18), Position = UD2(0, 8, 1, -26), Text = "Join", Font = Font.GothamBold, TextSize = 10, TextColor3 = Theme["Color Text"],
+				BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.65, AutoButtonColor = false
+			}), "Theme")
+			Make("Corner", Join, UD(0, 5))
+
+			local Delay
+			Join.Activated:Connect(function()
+				if Delay then return end
+				Delay = true
+				setclipboard(Invite)
+				SetProps(Join, {Text = "Copied!", BackgroundColor3 = C3(80, 80, 80), BackgroundTransparency = 0, TextColor3 = C3(150, 150, 150)})
+				task.wait(3)
+				SetProps(Join, {Text = "Join", BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.65, TextColor3 = Theme["Color Text"]})
+				Delay = false
+			end)
+
+			local D = {}
+			function D:Visible(b) Funcs.ToggleVisible(Card, b) end
+			function D:Destroy() Card:Destroy() end
+			return D
+		end
+
+		if Smooth and not IsFirst then
+			local Q = {}
+			TabQueues[#TabQueues + 1] = Q
+			PumpQueues()
+			return setmetatable({Cont = Container}, {__index = function(_, k)
+				local v = Tab[k]
+				if type(k) == "string" and k:sub(1, 3) == "Add" then
+					return function(_, ...)
+						local a = table.pack(...)
+						PumpQueues()
+						return Defer(Q, function() return v(Tab, table.unpack(a, 1, a.n)) end)
+					end
+				end
+				return v
+			end})
+		end
+		return Tab
+	end
+
+	CloseButton.Activated:Connect(Window.CloseBtn)
+	MinimizeButton.Activated:Connect(Window.MinimizeBtn)
+	return Window
+end
+
+return veltrolib
