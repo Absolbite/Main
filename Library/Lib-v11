@@ -946,7 +946,8 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "11.0.0"},
+	DrawerSide = "Left",
+	Info = {Version = "8.1.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast"},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
@@ -1360,7 +1361,7 @@ function veltrolib:MakeWindow(Configs)
 
 	local Smooth = (Configs.LoadMethod or veltrolib.Save.LoadMethod) == "Smooth"
 	local Minimized, SaveSize, WaitClick, MinimizeBtnCustomImage
-	local Window, FirstTab = {}, false
+	local Window, FirstTab = {Scrolls = {}}, false
 
 	local UISizeX, UISizeY = unpack(veltrolib.Save.UISize)
 	local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
@@ -1440,6 +1441,16 @@ function veltrolib:MakeWindow(Configs)
 	end
 	ControlSize1:GetPropertyChangedSignal("Position"):Connect(ControlSize)
 	ControlSize2:GetPropertyChangedSignal("Position"):Connect(ControlSize)
+
+	local function Isolate(area, targets)
+		local function Set(on) for _, t in targets() do t.ScrollingEnabled = on end end
+		area.MouseEnter:Connect(function() Set(false) end)
+		area.MouseLeave:Connect(function() Set(true) end)
+		area.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.Touch then Set(false) end end)
+		area.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.Touch then Set(true) end end)
+	end
+	Isolate(MainScroll, function() return Window.Scrolls end)
+	Isolate(Containers, function() return {MainScroll} end)
 
 	ControlSize1.InputBegan:Connect(function(Input)
 		if not IsPress(Input) then return end
@@ -1542,6 +1553,20 @@ function veltrolib:MakeWindow(Configs)
 	end
 
 	function Window:Dialog(Cfg)
+		if Smooth and QueueWorker then
+			local real, pending = nil, {}
+			task.spawn(function()
+				while QueueWorker do task.wait() end
+				real = Window:Dialog(Cfg)
+				if real then for _, p in pending do real[p[1]](real, table.unpack(p, 2, p.n)) end end
+			end)
+			return setmetatable({}, {__index = function(_, k)
+				return function(_, ...)
+					if real then return real[k](real, ...) end
+					pending[#pending + 1] = table.pack(k, ...)
+				end
+			end})
+		end
 		if MainFrame:FindFirstChild("Dialog") then return end
 		if Minimized then Window:MinimizeBtn() end
 
@@ -1843,6 +1868,7 @@ function veltrolib:MakeWindow(Configs)
 			Create("UIListLayout", {Padding = UD(0, 5)})
 		}), "ScrollBar")
 		ContainerList[#ContainerList + 1] = Container
+		Window.Scrolls[#Window.Scrolls + 1] = Container
 		if not FirstTab then
 			Container.Parent = Containers
 			PageTitleLabel.Text = TName
@@ -2098,13 +2124,13 @@ function veltrolib:MakeWindow(Configs)
 			end
 			FButton.MouseButton1Down:Connect(function()
 				IsHeld = true
-				Flash.BackgroundTransparency = 0.55
+				Flash.BackgroundTransparency = 0.78
 				if EndConn then EndConn:Disconnect() end
 				EndConn = UIS.InputEnded:Connect(function(I) if IsPress(I) then Release() end end)
 			end)
 			FButton.MouseLeave:Connect(function() if IsHeld then Release() end end)
 			FButton.Activated:Connect(function()
-				Flash.BackgroundTransparency = 0.55
+				Flash.BackgroundTransparency = 0.78
 				Release()
 				if BFlag then
 					Pressed = not Pressed
@@ -2256,7 +2282,7 @@ function veltrolib:MakeWindow(Configs)
 			})
 			local NoClick = Create("TextButton", DropdownHolder, {Name = "AntiClick", Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, Text = "", ZIndex = Z})
 			local DropFrame = Create("Frame", NoClick, {
-				Size = UD2(0, DropWidth, 0, 0), BackgroundTransparency = 0.1, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0, 1),
+				Size = UD2(0, 0, 0, 0), BackgroundTransparency = 0.1, BackgroundColor3 = Color3.new(1, 1, 1), AnchorPoint = Vector2.new(0, 0),
 				Name = "DropdownFrame", ClipsDescendants = true, Active = true, ZIndex = Z
 			})
 			Make("Corner", DropFrame)
@@ -2295,22 +2321,22 @@ function veltrolib:MakeWindow(Configs)
 				Selected = type(savedFlag) == "string" and savedFlag or Defaults[1]
 			end
 
-			local function FrameSize() return UDim2.fromOffset(DropWidth, ScrollSize + 30) end
-			local function Resize()
-				ScrollSize = math.min(VisibleCount, 10) * 25 + 10
-				if NoClick.Visible then CreateTween({DropFrame, "Size", FrameSize(), 0.2}) end
+			local function Resize() end
+			local function DrawerSize(w)
+				return UDim2.fromOffset(w, MainFrame.AbsoluteSize.Y / UIScale)
 			end
-			local function CalcPos(instant)
-				local fp, ss = SelFrame.AbsolutePosition, ScreenGui.AbsoluteSize
-				local pos = UDim2.fromOffset(math.clamp(fp.X / UIScale, 0, ss.X / UIScale - DropWidth), math.clamp(fp.Y / UIScale, 0, ss.Y / UIScale))
-				DropFrame.AnchorPoint = Vector2.new(0, fp.Y > ss.Y / 1.4 and 1 or ScrollSize > 80 and 0.5 or 0)
-				if instant then DropFrame.Position = pos else CreateTween({DropFrame, "Position", pos, 0.1}) end
+			local function CalcPos()
+				local mp, ms = MainFrame.AbsolutePosition, MainFrame.AbsoluteSize
+				local left = veltrolib.DrawerSide ~= "Right"
+				DropFrame.AnchorPoint = Vector2.new(left and 0 or 1, 0)
+				DropFrame.Position = UDim2.fromOffset((mp.X + (left and 0 or ms.X)) / UIScale, mp.Y / UIScale)
+				DropFrame.Size = DrawerSize(DropFrame.AbsoluteSize.X / UIScale)
 			end
 			local function Disable()
 				if not NoClick.Visible then return end
 				WaitDrop = true
 				CreateTween({Arrow, "ImageColor3", Color3.new(1, 1, 1), 0.2})
-				CreateTween({DropFrame, "Size", UD2(0, DropWidth, 0, 0), 0.2, true})
+				CreateTween({DropFrame, "Size", DrawerSize(0), 0.2, true})
 				Arrow.Image = "rbxassetid://10709790948"
 				NoClick.Visible = false
 				if SearchBox.Text ~= "" then SearchBox.Text = "" end
@@ -2320,11 +2346,12 @@ function veltrolib:MakeWindow(Configs)
 				if WaitDrop then return end
 				if NoClick.Visible then return Disable() end
 				WaitDrop = true
-				CalcPos(true)
+				DropFrame.Size = DrawerSize(0)
+				CalcPos()
 				NoClick.Visible = true
 				Arrow.Image = "rbxassetid://10709791523"
 				CreateTween({Arrow, "ImageColor3", Theme["Color Theme"], 0.2})
-				CreateTween({DropFrame, "Size", FrameSize(), 0.2, true})
+				CreateTween({DropFrame, "Size", DrawerSize(DropWidth), 0.2, true})
 				WaitDrop = false
 			end
 
@@ -2475,7 +2502,9 @@ function veltrolib:MakeWindow(Configs)
 				Disable()
 			end)
 			MainFrame:GetPropertyChangedSignal("Visible"):Connect(Disable)
-			SelFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function() if NoClick.Visible then CalcPos() end end)
+			for _, sig in {"AbsolutePosition", "AbsoluteSize"} do
+				MainFrame:GetPropertyChangedSignal(sig):Connect(function() if NoClick.Visible and not WaitDrop then CalcPos() end end)
+			end
 
 			local Dropdown = {}
 			function Dropdown:Visible(b) Funcs.ToggleVisible(Button, b) end
