@@ -947,7 +947,7 @@ zoomout 10747384679
 local veltrolib = {
 	Themes = Themes,
 	Info = {Version = "8.1.0"},
-	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", Images = {}, SelectedImage = "", ImageVisibility = 1},
+	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", Images = {}, SelectedImage = "", ImageVisibility = 1, ElementVisibility = 50},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
 
@@ -1021,7 +1021,7 @@ end
 do
 	local ok, d = pcall(function() return isfile and isfile(SaveFile) and HttpService:JSONDecode(readfile(SaveFile)) end)
 	if ok and type(d) == "table" then
-		for _, k in {"UISize", "TabHeight", "Transparency", "MinimizeButtons", "MainImage", "Images", "SelectedImage", "ImageVisibility"} do
+		for _, k in {"UISize", "TabHeight", "Transparency", "MinimizeButtons", "MainImage", "Images", "SelectedImage", "ImageVisibility", "ElementVisibility"} do
 			if d[k] ~= nil then veltrolib.Save[k] = d[k] end
 		end
 		if Themes[d.Theme] then veltrolib.Save.Theme = d.Theme end
@@ -1163,6 +1163,7 @@ local ColorProp = {
 	ScrollingFrame = "ScrollBarImageColor3", UIStroke = "Color"
 }
 local function Col(i, v) local p = ColorProp[i.ClassName] if p then i[p] = v end end
+local function ElementT() return 1 - 0.003 * math.clamp(veltrolib.Save.ElementVisibility or 50, 0, 100) end
 local function PanelT(add) return Theme["Panel Transparency"] or math.clamp(CurrentTransparency + add, 0, 0.95) end
 local function StrokeT(i) if i.ClassName == "UIStroke" then i.Transparency = Theme["Stroke Transparency"] or 0 end end
 
@@ -1179,6 +1180,8 @@ local ThemeApply = {
 	DarkText = function(i) Col(i, Theme["Color Dark Text"]) end,
 	TabBG = function(i) i.BackgroundColor3 = Theme["Color Theme"] end,
 	ScrollBar = function(i) Col(i, Theme["Color Theme"]) end,
+	ElementImg = function(i) i.ImageTransparency = ElementT() end,
+	ElementBG = function(i) i.BackgroundColor3 = Theme["Color Theme"] i.BackgroundTransparency = ElementT() end,
 	DropdownOpt = function(i)
 		local on = i:GetAttribute("Selected") == true
 		i.BackgroundColor3 = Theme["Color Theme"]
@@ -1191,8 +1194,8 @@ local function ButtonFrame(Parent, Title, Description, HolderSize)
 	local H = 25
 	local Frame = InsertTheme(Create("TextButton", Parent, {
 		Size = UD2(1, 0, 0, hasDesc and 38 or H), Text = "", AutoButtonColor = false,
-		BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"
-	}), "Theme")
+		BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = ElementT(), Name = "Option"
+	}), "ElementBG")
 	Make("Corner", Frame, UD(0, 3))
 
 	local TitleL = InsertTheme(Create("TextLabel", Frame, {
@@ -1299,8 +1302,12 @@ function veltrolib:SetImageVisibility(v)
 	SaveJson(veltrolib.Save)
 end
 
-function veltrolib:SetImageTransparency(v)
-	veltrolib:SetTransparency((tonumber(v) or 0) / 100)
+function veltrolib:SetElementVisibility(v)
+	veltrolib.Save.ElementVisibility = math.clamp(tonumber(v) or 50, 0, 100)
+	SaveJson(veltrolib.Save)
+	for inst, typ in Themed do
+		if typ == "ElementBG" or typ == "ElementImg" then ThemeApply[typ](inst) end
+	end
 end
 
 function veltrolib:GetImageNames()
@@ -1784,7 +1791,7 @@ function veltrolib:MakeWindow(Configs)
 	function Window:SetLoadMethod(m) veltrolib:SetLoadMethod(m) end
 	function Window:SetBackgroundImage(v) veltrolib:SetBackgroundImage(v) end
 	function Window:SetImageVisibility(v) veltrolib:SetImageVisibility(v) end
-	function Window:SetImageTransparency(v) veltrolib:SetImageTransparency(v) end
+	function Window:SetElementVisibility(v) veltrolib:SetElementVisibility(v) end
 	function Window:SelectImage(n) veltrolib:SelectImage(n) end
 	function Window:CreateImage(n, u) return veltrolib:CreateImage(n, u) end
 	function Window:GetImageNames() return veltrolib:GetImageNames() end
@@ -2007,8 +2014,8 @@ function veltrolib:MakeWindow(Configs)
 
 			local Wrapper = Create("Frame", Container, {Size = UD2(1, 0, 0, 23), BackgroundTransparency = 1, Name = "Option"})
 			local Header = InsertTheme(Create("TextButton", Wrapper, {
-				Size = UD2(1, 0, 0, 23), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Text = "", AutoButtonColor = false, Name = "SectionHeader"
-			}), "Theme")
+				Size = UD2(1, 0, 0, 23), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = ElementT(), Text = "", AutoButtonColor = false, Name = "SectionHeader"
+			}), "ElementBG")
 			Make("Corner", Header, UD(0, 3))
 			local lx = 12
 			if SIcon then
@@ -2106,8 +2113,8 @@ function veltrolib:MakeWindow(Configs)
 			while C["Text" .. i] do texts[i] = tostring(C["Text" .. i]) i += 1 end
 
 			local Outer = InsertTheme(Create("TextButton", Container, {
-				Size = UD2(1, 0, 0, 25), Text = "", AutoButtonColor = false, BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"
-			}), "Theme")
+				Size = UD2(1, 0, 0, 25), Text = "", AutoButtonColor = false, BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = ElementT(), Name = "Option"
+			}), "ElementBG")
 			Make("Corner", Outer, UD(0, 3))
 			local Inner = Create("Frame", Outer, {Size = UD2(1, -20, 0, 0), Position = UD2(0, 10, 0, 7), BackgroundTransparency = 1, Name = "InnerLayout"})
 			Create("UIListLayout", Inner, {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UD(0, 2)})
@@ -2763,16 +2770,13 @@ function veltrolib:MakeWindow(Configs)
 			local hasLogo = type(Logo) == "string" and Logo:gsub(" ", ""):len() > 0
 			if hasLogo then Logo = veltrolib:GetIcon(Logo) end
 
-			local Card = InsertTheme(Create("Frame", Container, {Size = UD2(1, 0, 0, 80), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.85, Name = "Option"}), "Theme")
+			local Card = InsertTheme(Create("Frame", Container, {Size = UD2(1, 0, 0, 80), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = ElementT(), Name = "Option"}), "ElementBG")
 			Make("Corner", Card, UD(0, 3))
 			if hasLogo then
-				local IF = InsertTheme(Create("Frame", Card, {
-					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = 0.75, Name = "LogoFrame"
-				}), "Theme")
-				Make("Corner", IF, UD(0, 5))
-				Create("ImageLabel", IF, {
-					Size = UD2(1, 0, 1, 0), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1), ImageTransparency = 0.1, ScaleType = Enum.ScaleType.Crop
-				}, {Create("UICorner", {CornerRadius = UD(0, 5)})})
+				InsertTheme(Create("ImageLabel", Card, {
+					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1),
+					ImageTransparency = ElementT(), ScaleType = Enum.ScaleType.Crop, Name = "Logo"
+				}, {Create("UICorner", {CornerRadius = UD(0, 5)})}), "ElementImg")
 			end
 			local x = hasLogo and 50 or 10
 			InsertTheme(Create("TextLabel", Card, {
