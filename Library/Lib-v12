@@ -948,7 +948,7 @@ local veltrolib = {
 	Themes = Themes,
 	Info = {Version = "12.0.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", SelectedImage = "", ImageVisibility = 1, ElementVisibility = 5},
-	LogoTransparency = 0.85,
+	LogoTransparency = 0.50,
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
 
