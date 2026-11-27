@@ -946,8 +946,8 @@ zoomout 10747384679
 
 local veltrolib = {
 	Themes = Themes,
-	Info = {Version = "8.1.0"},
-	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", Images = {}, SelectedImage = "", ImageVisibility = 1, ElementVisibility = 50},
+	Info = {Version = "12.0.0"},
+	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", Images = {}, SelectedImage = "", ImageVisibility = 1, ElementVisibility = 5},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
 
@@ -986,11 +986,12 @@ local SaveRoot = "Veltro-Lib"
 local SaveFolder = SaveRoot .. "/Ui-Settings"
 local SaveFile = SaveFolder .. "/Veltro-Lib-Ui.json"
 local ImgCache = SaveFolder .. "/images"
+local CacheDir = SaveFolder .. "/cache"
 local CanFS = makefolder and writefile and isfolder and true or false
 
 local function EnsureFolders()
 	if not CanFS then return end
-	for _, f in {SaveRoot, SaveFolder, ImgCache} do
+	for _, f in {SaveRoot, SaveFolder, ImgCache, CacheDir} do
 		if not isfolder(f) then makefolder(f) end
 	end
 end
@@ -1005,7 +1006,7 @@ function veltrolib.FetchHttpImage(url)
 	if ImageAssetCache[url] then return ImageAssetCache[url] end
 	if not CanFS then return url end
 	EnsureFolders()
-	local path = ImgCache .. "/" .. url:gsub("[^%w%-_]", "_"):sub(1, 60) .. "." .. (url:match("%.(%w+)%??[^%.]*$") or "png")
+	local path = CacheDir .. "/" .. url:gsub("[^%w%-_]", "_"):sub(1, 60) .. "." .. (url:match("%.(%w+)%??[^%.]*$") or "png")
 	if not isfile(path) then
 		local ok, body = pcall(game.HttpGet, game, url)
 		if not ok or not body then return url end
@@ -1163,7 +1164,10 @@ local ColorProp = {
 	ScrollingFrame = "ScrollBarImageColor3", UIStroke = "Color"
 }
 local function Col(i, v) local p = ColorProp[i.ClassName] if p then i[p] = v end end
-local function ElementT() return 1 - 0.003 * math.clamp(veltrolib.Save.ElementVisibility or 50, 0, 100) end
+local function ElementT()
+	local v = math.clamp(veltrolib.Save.ElementVisibility or 5, 0, 100)
+	return v < 5 and 1 - 0.03 * v or 0.85 - (v - 5) * 0.55 / 95
+end
 local function PanelT(add) return Theme["Panel Transparency"] or math.clamp(CurrentTransparency + add, 0, 0.95) end
 local function StrokeT(i) if i.ClassName == "UIStroke" then i.Transparency = Theme["Stroke Transparency"] or 0 end end
 
@@ -1180,7 +1184,6 @@ local ThemeApply = {
 	DarkText = function(i) Col(i, Theme["Color Dark Text"]) end,
 	TabBG = function(i) i.BackgroundColor3 = Theme["Color Theme"] end,
 	ScrollBar = function(i) Col(i, Theme["Color Theme"]) end,
-	ElementImg = function(i) i.ImageTransparency = ElementT() end,
 	ElementBG = function(i) i.BackgroundColor3 = Theme["Color Theme"] i.BackgroundTransparency = ElementT() end,
 	DropdownOpt = function(i)
 		local on = i:GetAttribute("Selected") == true
@@ -1250,7 +1253,7 @@ end
 function veltrolib:GetIcon(index)
 	if type(index) ~= "string" or #index == 0 then return index end
 	if index:find("^https?://") then return self.FetchHttpImage(index) end
-	if index:find("rbxassetid://", 1, true) then return index end
+	if index:find("rbxasset", 1, true) then return index end
 	index = index:lower():gsub("lucide", ""):gsub("-", "")
 	if Icons[index] then return Icons[index] end
 	for Name, Icon in Icons do
@@ -1303,24 +1306,51 @@ function veltrolib:SetImageVisibility(v)
 end
 
 function veltrolib:SetElementVisibility(v)
-	veltrolib.Save.ElementVisibility = math.clamp(tonumber(v) or 50, 0, 100)
+	veltrolib.Save.ElementVisibility = math.clamp(tonumber(v) or 5, 0, 100)
 	SaveJson(veltrolib.Save)
 	for inst, typ in Themed do
-		if typ == "ElementBG" or typ == "ElementImg" then ThemeApply[typ](inst) end
+		if typ == "ElementBG" then ThemeApply.ElementBG(inst) end
+	end
+end
+
+local ImgExt = {png = true, jpg = true, jpeg = true}
+local function FolderImages()
+	local out = {}
+	if CanFS and listfiles and isfolder(ImgCache) then
+		local ok, list = pcall(listfiles, ImgCache)
+		if ok then
+			for _, f in list do
+				local n, e = f:match("([^/\\]+)%.(%w+)$")
+				if n and ImgExt[e:lower()] then out[n] = f end
+			end
+		end
+	end
+	return out
+end
+
+function veltrolib:ResolveImage(name)
+	local url = veltrolib.Save.Images[name]
+	if url then return veltrolib:GetIcon(url) end
+	local file = FolderImages()[name]
+	if file and getcustomasset then
+		local ok, asset = pcall(getcustomasset, file)
+		if ok then return asset end
 	end
 end
 
 function veltrolib:GetImageNames()
+	local set = FolderImages()
+	for n in veltrolib.Save.Images do set[n] = true end
 	local names = {}
-	for n in veltrolib.Save.Images do names[#names + 1] = n end
+	for n in set do names[#names + 1] = n end
 	table.sort(names)
 	return names
 end
 
 function veltrolib:SelectImage(name)
-	local url = veltrolib.Save.Images[name]
-	veltrolib.Save.SelectedImage = url and name or ""
-	veltrolib:SetBackgroundImage(url or "")
+	local id = veltrolib:ResolveImage(name)
+	veltrolib.Save.SelectedImage = id and name or ""
+	veltrolib:SetBackgroundImage(id or "")
 end
 
 function veltrolib:CreateImage(name, url)
@@ -1421,8 +1451,8 @@ function veltrolib:MakeWindow(Configs)
 	_MainGradient = Make("Gradient", MainFrame, {Rotation = 45})
 	do
 		local sel = veltrolib.Save.SelectedImage
-		local url = sel ~= "" and veltrolib.Save.Images[sel]
-		if url then MainFrame.Image = veltrolib:GetIcon(url) veltrolib.Save.MainImage = MainFrame.Image end
+		local id = sel ~= "" and veltrolib:ResolveImage(sel)
+		if id then MainFrame.Image = id veltrolib.Save.MainImage = id end
 		_MainGradient.Enabled = MainFrame.Image == ""
 		MainFrame.ImageTransparency = 1 - veltrolib.Save.ImageVisibility
 	end
@@ -2775,8 +2805,8 @@ function veltrolib:MakeWindow(Configs)
 			if hasLogo then
 				InsertTheme(Create("ImageLabel", Card, {
 					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1),
-					ImageTransparency = ElementT(), ScaleType = Enum.ScaleType.Crop, Name = "Logo"
-				}, {Create("UICorner", {CornerRadius = UD(0, 5)})}), "ElementImg")
+					ImageTransparency = 0.65, ScaleType = Enum.ScaleType.Crop, Name = "Logo"
+				}, {Create("UICorner", {CornerRadius = UD(0, 5)})})
 			end
 			local x = hasLogo and 50 or 10
 			InsertTheme(Create("TextLabel", Card, {
