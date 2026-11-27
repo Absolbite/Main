@@ -947,7 +947,7 @@ zoomout 10747384679
 local veltrolib = {
 	Themes = Themes,
 	Info = {Version = "12.0.0"},
-	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", Images = {}, SelectedImage = "", ImageVisibility = 1, ElementVisibility = 5},
+	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", SelectedImage = "", ImageVisibility = 1, ElementVisibility = 5},
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
 
@@ -1022,7 +1022,7 @@ end
 do
 	local ok, d = pcall(function() return isfile and isfile(SaveFile) and HttpService:JSONDecode(readfile(SaveFile)) end)
 	if ok and type(d) == "table" then
-		for _, k in {"UISize", "TabHeight", "Transparency", "MinimizeButtons", "MainImage", "Images", "SelectedImage", "ImageVisibility", "ElementVisibility"} do
+		for _, k in {"UISize", "TabHeight", "Transparency", "MinimizeButtons", "MainImage", "SelectedImage", "ImageVisibility", "ElementVisibility"} do
 			if d[k] ~= nil then veltrolib.Save[k] = d[k] end
 		end
 		if Themes[d.Theme] then veltrolib.Save.Theme = d.Theme end
@@ -1316,33 +1316,26 @@ end
 local ImgExt = {png = true, jpg = true, jpeg = true}
 local function FolderImages()
 	local out = {}
-	if CanFS and listfiles and isfolder(ImgCache) then
-		local ok, list = pcall(listfiles, ImgCache)
-		if ok then
-			for _, f in list do
-				local n, e = f:match("([^/\\]+)%.(%w+)$")
-				if n and ImgExt[e:lower()] then out[n] = f end
-			end
+	pcall(function()
+		EnsureFolders()
+		for _, f in listfiles(ImgCache) do
+			local n, e = tostring(f):match("([^/\\]+)%.(%w+)$")
+			if n and ImgExt[e:lower()] then out[n] = f end
 		end
-	end
+	end)
 	return out
 end
 
 function veltrolib:ResolveImage(name)
-	local url = veltrolib.Save.Images[name]
-	if url then return veltrolib:GetIcon(url) end
 	local file = FolderImages()[name]
-	if file and getcustomasset then
-		local ok, asset = pcall(getcustomasset, file)
-		if ok then return asset end
-	end
+	if not file then return end
+	local ok, asset = pcall(getcustomasset or getsynasset, file)
+	if ok then return asset end
 end
 
 function veltrolib:GetImageNames()
-	local set = FolderImages()
-	for n in veltrolib.Save.Images do set[n] = true end
 	local names = {}
-	for n in set do names[#names + 1] = n end
+	for n in FolderImages() do names[#names + 1] = n end
 	table.sort(names)
 	return names
 end
@@ -1353,13 +1346,19 @@ function veltrolib:SelectImage(name)
 	veltrolib:SetBackgroundImage(id or "")
 end
 
-function veltrolib:CreateImage(name, url)
-	name, url = Trim(name), Trim(url)
-	if name == "" then return false, "Image Name is empty" end
+function veltrolib:CreateImage(url)
+	url = Trim(url)
 	if url == "" then return false, "Image URL is empty" end
-	if name:lower() == "none" then return false, "Image Name is reserved" end
-	veltrolib.Save.Images[name] = url
-	SaveJson(veltrolib.Save)
+	local file = url:gsub("[?#].*$", ""):match("([^/]+)$") or "image"
+	local name, ext = file:match("^(.-)%.(%w+)$")
+	name, ext = name or file, (ext or "png"):lower()
+	if not ImgExt[ext] then return false, "Only png / jpg / jpeg" end
+	name = name:gsub("[^%w%-_ ]", "_")
+	if name == "" or name:lower() == "none" then name = "image" end
+	local ok, body = pcall(game.HttpGet, game, url)
+	if not ok or type(body) ~= "string" or #body == 0 then return false, "Download failed" end
+	EnsureFolders()
+	if not pcall(writefile, ImgCache .. "/" .. name .. "." .. ext, body) then return false, "Save failed" end
 	return true, name
 end
 
@@ -1823,7 +1822,7 @@ function veltrolib:MakeWindow(Configs)
 	function Window:SetImageVisibility(v) veltrolib:SetImageVisibility(v) end
 	function Window:SetElementVisibility(v) veltrolib:SetElementVisibility(v) end
 	function Window:SelectImage(n) veltrolib:SelectImage(n) end
-	function Window:CreateImage(n, u) return veltrolib:CreateImage(n, u) end
+	function Window:CreateImage(u) return veltrolib:CreateImage(u) end
 	function Window:GetImageNames() return veltrolib:GetImageNames() end
 
 	function Window:Notify(Cfg)
