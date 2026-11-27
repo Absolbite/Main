@@ -948,6 +948,7 @@ local veltrolib = {
 	Themes = Themes,
 	Info = {Version = "12.0.0"},
 	Save = {UISize = {550, 380}, TabSize = 135, TabHeight = 32, Theme = "Darker", Transparency = 0.03, MinimizeButtons = {}, MainImage = "", Scale = 465, LoadMethod = "Fast", SelectedImage = "", ImageVisibility = 1, ElementVisibility = 5},
+	LogoTransparency = 0.85,
 	Settings = {}, Connection = {}, Instances = {}, Elements = {}, Options = {}, Flags = {}, Tabs = {}, Icons = Icons
 }
 
@@ -1346,14 +1347,15 @@ function veltrolib:SelectImage(name)
 	veltrolib:SetBackgroundImage(id or "")
 end
 
-function veltrolib:CreateImage(url)
-	url = Trim(url)
+function veltrolib:CreateImage(name, url)
+	name, url = Trim(name), Trim(url)
 	if url == "" then return false, "Image URL is empty" end
 	local file = url:gsub("[?#].*$", ""):match("([^/]+)$") or "image"
-	local name, ext = file:match("^(.-)%.(%w+)$")
-	name, ext = name or file, (ext or "png"):lower()
+	local base, ext = file:match("^(.-)%.(%w+)$")
+	ext = (ext or "png"):lower()
 	if not ImgExt[ext] then return false, "Only png / jpg / jpeg" end
-	name = name:gsub("[^%w%-_ ]", "_")
+	if name == "" then name = base or file end
+	name = Trim((name:gsub("[\\/:*?\"<>|]", "_")))
 	if name == "" or name:lower() == "none" then name = "image" end
 	local ok, body = pcall(game.HttpGet, game, url)
 	if not ok or type(body) ~= "string" or #body == 0 then return false, "Download failed" end
@@ -1822,7 +1824,7 @@ function veltrolib:MakeWindow(Configs)
 	function Window:SetImageVisibility(v) veltrolib:SetImageVisibility(v) end
 	function Window:SetElementVisibility(v) veltrolib:SetElementVisibility(v) end
 	function Window:SelectImage(n) veltrolib:SelectImage(n) end
-	function Window:CreateImage(u) return veltrolib:CreateImage(u) end
+	function Window:CreateImage(n, u) return veltrolib:CreateImage(n, u) end
 	function Window:GetImageNames() return veltrolib:GetImageNames() end
 
 	function Window:Notify(Cfg)
@@ -2804,7 +2806,7 @@ function veltrolib:MakeWindow(Configs)
 			if hasLogo then
 				Create("ImageLabel", Card, {
 					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1),
-					ImageTransparency = 0.65, ScaleType = Enum.ScaleType.Crop, Name = "Logo"
+					ImageTransparency = veltrolib.LogoTransparency, ScaleType = Enum.ScaleType.Crop, Name = "Logo"
 				}, {Create("UICorner", {CornerRadius = UD(0, 5)})})
 			end
 			local x = hasLogo and 50 or 10
