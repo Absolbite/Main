@@ -2802,7 +2802,7 @@ function veltrolib:MakeWindow(Configs)
 			local Card = InsertTheme(Create("Frame", Container, {Size = UD2(1, 0, 0, 80), BackgroundColor3 = Theme["Color Theme"], BackgroundTransparency = ElementT(), Name = "Option"}), "ElementBG")
 			Make("Corner", Card, UD(0, 3))
 			if hasLogo then
-				InsertTheme(Create("ImageLabel", Card, {
+				Create("ImageLabel", Card, {
 					Size = UD2(0, 34, 0, 34), Position = UD2(0, 8, 0, 8), BackgroundTransparency = 1, Image = Logo, ImageColor3 = Color3.new(1, 1, 1),
 					ImageTransparency = 0.65, ScaleType = Enum.ScaleType.Crop, Name = "Logo"
 				}, {Create("UICorner", {CornerRadius = UD(0, 5)})})
